@@ -218,5 +218,5 @@ SPECTACULAR_SETTINGS = {
 
 # GDAL Settings
 # Uncomment and set these paths if GDAL is installed but Django can't find it
-# GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
-# GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'
+GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
+GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'
