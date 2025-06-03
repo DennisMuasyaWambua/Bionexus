@@ -1,0 +1,1148 @@
+{
+	"info": {
+		"_postman_id": "f5e36d2d-2a88-40a6-9f3c-5b4e6a8f5f0a",
+		"name": "BioNexus Gaia API",
+		"description": "API collection for the BioNexus Gaia platform, an AI and blockchain-powered biodiversity conservation platform.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123!\",\n    \"password2\": \"StrongPassword123!\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"bio\": \"I'm a conservation enthusiast.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								""
+							]
+						},
+						"description": "Register a new user with email and password (Web2 authentication)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"StrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Login with username and password to get JWT access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/token/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"token",
+								"refresh",
+								""
+							]
+						},
+						"description": "Refresh JWT token when the access token expires."
+					},
+					"response": []
+				},
+				{
+					"name": "Web3 Wallet Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wallet_address\": \"0x1234567890abcdef1234567890abcdef12345678\",\n    \"wallet_type\": \"metamask\",\n    \"signature\": \"0x...\",\n    \"message\": \"I want to register with BioNexus Gaia with address 0x1234567890abcdef1234567890abcdef12345678\",\n    \"username\": \"wallet_user\",\n    \"email\": \"wallet@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/wallet-register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"wallet-register",
+								""
+							]
+						},
+						"description": "Register a new user with a Web3 wallet (MetaMask, WalletConnect, etc.)"
+					},
+					"response": []
+				},
+				{
+					"name": "Web3 Wallet Connect",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wallet_address\": \"0x1234567890abcdef1234567890abcdef12345678\",\n    \"signature\": \"0x...\",\n    \"message\": \"I want to connect to BioNexus Gaia with address 0x1234567890abcdef1234567890abcdef12345678\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/wallet-connect/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"wallet-connect",
+								""
+							]
+						},
+						"description": "Authenticate with a Web3 wallet address and signature."
+					},
+					"response": []
+				}
+			],
+			"description": "User registration and authentication endpoints."
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile",
+								""
+							]
+						},
+						"description": "Get the current user's profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bio\": \"I'm passionate about conservation and biodiversity.\",\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\",\n    \"notification_preferences\": {\n        \"email_notifications\": true,\n        \"mission_updates\": true\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile",
+								""
+							]
+						},
+						"description": "Update the current user's profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/stats/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"stats",
+								""
+							]
+						},
+						"description": "Get the current user's contribution statistics."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Activities",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/activities/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"activities",
+								""
+							]
+						},
+						"description": "Get the current user's activity history."
+					},
+					"response": []
+				}
+			],
+			"description": "User profile and statistics endpoints."
+		},
+		{
+			"name": "Biodiversity Records",
+			"item": [
+				{
+					"name": "List Biodiversity Records",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/?species_name=&is_verified=&page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								""
+							],
+							"query": [
+								{
+									"key": "species_name",
+									"value": ""
+								},
+								{
+									"key": "is_verified",
+									"value": ""
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "List and search biodiversity records with filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Biodiversity Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "species_name",
+									"value": "Quercus rubra",
+									"type": "text"
+								},
+								{
+									"key": "common_name",
+									"value": "Northern Red Oak",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "40.7128",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "-74.0060",
+									"type": "text"
+								},
+								{
+									"key": "location_name",
+									"value": "Central Park",
+									"type": "text"
+								},
+								{
+									"key": "observation_date",
+									"value": "2023-06-15T14:30:00Z",
+									"type": "text"
+								},
+								{
+									"key": "notes",
+									"value": "Healthy tree with full canopy.",
+									"type": "text"
+								},
+								{
+									"key": "is_public",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								""
+							]
+						},
+						"description": "Create a new biodiversity observation record."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Biodiversity Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/{{record_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								"{{record_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific biodiversity record."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Biodiversity Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "species_name",
+									"value": "Quercus rubra",
+									"type": "text"
+								},
+								{
+									"key": "common_name",
+									"value": "Northern Red Oak",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "40.7128",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "-74.0060",
+									"type": "text"
+								},
+								{
+									"key": "location_name",
+									"value": "Central Park, East Side",
+									"type": "text"
+								},
+								{
+									"key": "notes",
+									"value": "Updated notes: Very large specimen.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/{{record_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								"{{record_id}}",
+								""
+							]
+						},
+						"description": "Update a biodiversity record. Only the record contributor or admin can update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Biodiversity Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/{{record_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								"{{record_id}}",
+								""
+							]
+						},
+						"description": "Delete a biodiversity record. Only the record contributor or admin can delete."
+					},
+					"response": []
+				},
+				{
+					"name": "Export Biodiversity Records",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/export/?format=csv",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								"export",
+								""
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "csv",
+									"description": "Format can be 'csv' or 'json'"
+								}
+							]
+						},
+						"description": "Export biodiversity records as CSV or JSON."
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Record on Blockchain",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/{{record_id}}/validate/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"biodiversity",
+								"records",
+								"{{record_id}}",
+								"validate",
+								""
+							]
+						},
+						"description": "Validate a biodiversity record on the blockchain."
+					},
+					"response": []
+				}
+			],
+			"description": "Biodiversity record management endpoints."
+		},
+		{
+			"name": "AI Species Identification",
+			"item": [
+				{
+					"name": "Identify Species",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "latitude",
+									"value": "40.7128",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "longitude",
+									"value": "-74.0060",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "save_record",
+									"value": "true",
+									"description": "Create a biodiversity record from this identification",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/identify/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"identify",
+								""
+							]
+						},
+						"description": "Identify species from uploaded media (image, audio, or video)."
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Identify Species",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"image\": \"https://example.com/image1.jpg\"\n    },\n    {\n        \"image\": \"https://example.com/image2.jpg\",\n        \"latitude\": 40.7128,\n        \"longitude\": -74.0060\n    },\n    {\n        \"audio\": \"https://example.com/audio1.mp3\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/identify/batch/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"identify",
+								"batch",
+								""
+							]
+						},
+						"description": "Process multiple identification requests at once. Note: in a real implementation, the API would need to handle uploaded files or file URLs."
+					},
+					"response": []
+				},
+				{
+					"name": "Get AI Models Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/models/info/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"models",
+								"info",
+								""
+							]
+						},
+						"description": "Get information about available AI models and their confidence metrics."
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Identification Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"biodiversity_record\": \"{{record_id}}\",\n    \"ai_model\": \"{{ai_model_id}}\",\n    \"original_prediction\": {\n        \"species\": \"Quercus rubra\",\n        \"confidence\": 0.92\n    },\n    \"corrected_species\": \"Quercus alba\",\n    \"notes\": \"This is actually a white oak, not a red oak.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/feedback/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"feedback",
+								""
+							]
+						},
+						"description": "Submit correction feedback for an AI identification."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Taxonomy Data",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/taxonomy/Panthera_leo/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"taxonomy",
+								"Panthera_leo",
+								""
+							]
+						},
+						"description": "Get taxonomic information for a species."
+					},
+					"response": []
+				}
+			],
+			"description": "AI species identification and related endpoints."
+		},
+		{
+			"name": "Citizen Science",
+			"item": [
+				{
+					"name": "List Missions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/missions/?is_active=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"missions",
+								""
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "true"
+								}
+							]
+						},
+						"description": "List available citizen science missions."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Mission Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/missions/{{mission_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"missions",
+								"{{mission_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific mission."
+					},
+					"response": []
+				},
+				{
+					"name": "Join Mission",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/missions/{{mission_id}}/join/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"missions",
+								"{{mission_id}}",
+								"join",
+								""
+							]
+						},
+						"description": "Join a citizen science mission."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/leaderboard/?period=all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"leaderboard",
+								""
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "all",
+									"description": "Time period for leaderboard (all, month, week)"
+								}
+							]
+						},
+						"description": "Get the community leaderboard."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Biodiversity Map",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/map/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"map",
+								""
+							]
+						},
+						"description": "Get data for the interactive biodiversity map."
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Citizen Observation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"biodiversity_record\": \"{{record_id}}\",\n    \"mission\": \"{{mission_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/observations/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citizen",
+								"observations",
+								""
+							]
+						},
+						"description": "Submit a citizen science observation linked to a biodiversity record."
+					},
+					"response": []
+				}
+			],
+			"description": "Citizen science mission and participation endpoints."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "record_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "mission_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ai_model_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
