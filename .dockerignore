@@ -1,0 +1,22 @@
+# Environments
+venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local development settings
+.idea/
+.vscode/
+
+# Database
+db.sqlite3
+
+# Static files - collected by collectstatic
+staticfiles/
+
+# Git
+.git/
+.gitignore
