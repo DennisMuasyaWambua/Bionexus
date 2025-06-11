@@ -19,8 +19,9 @@ from .serializers import (
     UserStatsSerializer
 )
 from .models import UserActivity
-from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
-from bionexus_gaia.apps.citizen.models import MissionParticipation, CitizenObservation
+# Temporarily disabled due to GDAL/GEOS dependency
+# from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
+# from bionexus_gaia.apps.citizen.models import MissionParticipation, CitizenObservation
 
 User = get_user_model()
 
@@ -147,12 +148,12 @@ class UserStatsView(generics.GenericAPIView):
         """
         user = request.user
         
-        # Calculate stats
+        # Calculate stats (with biodiversity and citizen features disabled)
         stats = {
-            'total_observations': BiodiversityRecord.objects.filter(contributor=user).count(),
-            'verified_observations': BiodiversityRecord.objects.filter(contributor=user, is_verified=True).count(),
-            'total_missions': MissionParticipation.objects.filter(user=user).count(),
-            'completed_missions': MissionParticipation.objects.filter(user=user, is_completed=True).count(),
+            'total_observations': 0,  # Temporarily set to 0 while BiodiversityRecord is disabled
+            'verified_observations': 0,  # Temporarily set to 0 while BiodiversityRecord is disabled
+            'total_missions': 0,  # Temporarily set to 0 while MissionParticipation is disabled
+            'completed_missions': 0,  # Temporarily set to 0 while MissionParticipation is disabled
             'total_points': user.total_points,
             'badges': user.badges or [],
             'leaderboard_position': self._get_leaderboard_position(user)

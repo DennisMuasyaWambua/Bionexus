@@ -11,9 +11,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # API URLs
-    path('api/v1/biodiversity/', include('bionexus_gaia.apps.biodiversity.urls')),
-    path('api/v1/ai/', include('bionexus_gaia.apps.ai.urls')),
-    path('api/v1/citizen/', include('bionexus_gaia.apps.citizen.urls')),
+    # path('api/v1/biodiversity/', include('bionexus_gaia.apps.biodiversity.urls')),  # Temporarily disabled due to GeoDjango dependency
+    # path('api/v1/ai/', include('bionexus_gaia.apps.ai.urls')),  # Temporarily disabled due to BiodiversityRecord dependency
+    # path('api/v1/citizen/', include('bionexus_gaia.apps.citizen.urls')),  # Temporarily disabled due to GeoDjango dependency
     path('api/v1/auth/', include('bionexus_gaia.apps.users.auth_urls')),
     path('api/v1/users/', include('bionexus_gaia.apps.users.urls')),
     

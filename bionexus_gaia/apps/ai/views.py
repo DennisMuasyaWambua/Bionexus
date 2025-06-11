@@ -6,7 +6,7 @@ from rest_framework import viewsets, status, generics
 from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from django.contrib.gis.geos import Point
+# from django.contrib.gis.geos import Point  # Temporarily disabled due to GDAL/GEOS dependency
 
 from .models import AIModel, IdentificationFeedback
 from .serializers import (
@@ -15,7 +15,8 @@ from .serializers import (
     IdentificationSerializer,
     TaxonomySerializer
 )
-from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
+# Temporarily disabled due to GDAL/GEOS dependency
+# from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
 
 class AIModelViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -37,7 +38,7 @@ class AIModelViewSet(viewsets.ReadOnlyModelViewSet):
             'total_models': models.count(),
             'average_accuracy': sum(model.accuracy for model in models) / models.count() if models else 0,
             'supported_media_types': ['image', 'audio', 'video'],
-            'identification_count': BiodiversityRecord.objects.filter(ai_prediction__isnull=False).count(),
+            'identification_count': 0,  # Temporarily set to 0 while BiodiversityRecord is disabled
         }
         
         return Response({
@@ -80,15 +81,14 @@ class IdentificationAPIView(generics.GenericAPIView):
         # Mock identification logic (in production, this would call ML model API)
         species_data = self._mock_species_identification(serializer.validated_data)
         
-        # Create a biodiversity record if requested
+        # Biodiversity record creation is temporarily disabled
         save_record = request.data.get('save_record', False)
         if save_record:
-            record = self._create_biodiversity_record(serializer.validated_data, species_data)
+            # Return a message that biodiversity records are currently disabled
             return Response({
                 'identification': species_data,
-                'record_id': record.id,
-                'record_created': True
-            }, status=status.HTTP_201_CREATED)
+                'message': 'Biodiversity record creation is temporarily disabled due to missing GDAL/GEOS libraries',
+            }, status=status.HTTP_200_OK)
         
         return Response({'identification': species_data}, status=status.HTTP_200_OK)
     
@@ -121,36 +121,13 @@ class IdentificationAPIView(generics.GenericAPIView):
         
         return result
     
+    # This method is temporarily disabled due to GDAL/GEOS dependency
     def _create_biodiversity_record(self, input_data, species_data):
         """
         Create a biodiversity record from identification data.
+        This method is temporarily disabled due to missing GDAL/GEOS libraries.
         """
-        # Extract coordinates if provided
-        location = None
-        if 'latitude' in input_data and 'longitude' in input_data:
-            location = Point(
-                input_data['longitude'],
-                input_data['latitude'],
-                srid=4326
-            )
-        
-        # Create record
-        record = BiodiversityRecord.objects.create(
-            id=uuid.uuid4(),
-            contributor=self.request.user,
-            species_name=species_data['species'],
-            common_name=species_data['common_name'],
-            image=input_data.get('image', None),
-            audio=input_data.get('audio', None),
-            video=input_data.get('video', None),
-            location=location,
-            observation_date=input_data.get('observation_date', timezone.now()),
-            ai_prediction=species_data,
-            ai_confidence=species_data['confidence'],
-            is_public=True
-        )
-        
-        return record
+        raise NotImplementedError("This method is temporarily disabled due to missing GDAL/GEOS libraries.")
 
 
 class BatchIdentificationAPIView(generics.GenericAPIView):
