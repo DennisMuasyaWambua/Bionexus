@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',  # Enabled for Railway deployment
     
     # Third-party apps
     'rest_framework',
@@ -53,11 +52,18 @@ INSTALLED_APPS = [
     'drf_spectacular',
     
     # Project apps
-    'bionexus_gaia.apps.biodiversity',
-    'bionexus_gaia.apps.ai',
-    'bionexus_gaia.apps.citizen',
     'bionexus_gaia.apps.users',
 ]
+
+# Add GeoDjango and other apps only if not using SQLite
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
+if not USE_SQLITE:
+    INSTALLED_APPS.append('django.contrib.gis')  # GeoDjango
+    INSTALLED_APPS.extend([
+        'bionexus_gaia.apps.biodiversity',
+        'bionexus_gaia.apps.ai',
+        'bionexus_gaia.apps.citizen',
+    ])
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -94,17 +100,28 @@ WSGI_APPLICATION = 'bionexus_gaia.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Using PostGIS for Railway deployment
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.getenv('DB_NAME', 'bionexus_gaia'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+# Check if using SQLite for development or CI/CD
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
+
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Using PostGIS for Railway deployment
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.getenv('DB_NAME', 'bionexus_gaia'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -208,6 +225,7 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
 }
 
-# GDAL Settings - Enabled for Railway deployment
-GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
-GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'
+# GDAL Settings - Only enabled when not using SQLite
+if not USE_SQLITE:
+    GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
+    GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'

@@ -18,7 +18,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Collect static files
+# Create .env file for Docker build
+RUN echo "DEBUG=False" > .env && \
+    echo "SECRET_KEY=docker-build-key" >> .env && \
+    echo "USE_SQLITE=True" >> .env && \
+    echo "ALLOWED_HOSTS=*" >> .env
+
+# Collect static files (using SQLite config from .env)
 RUN python manage.py collectstatic --noinput
 
 # Run gunicorn
