@@ -1,31 +1,22 @@
+# Use official Python image
 FROM python:3.11-slim
 
-# Install required packages including GDAL
-RUN apt-get update && apt-get install -y \
-    binutils \
-    libproj-dev \
-    gdal-bin \
-    python3-gdal \
-    libgeos-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
+# Create working directory
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
 
-# Create .env file for Docker build
-RUN echo "DEBUG=False" > .env && \
-    echo "SECRET_KEY=docker-build-key" >> .env && \
-    echo "USE_SQLITE=True" >> .env && \
-    echo "ALLOWED_HOSTS=*" >> .env
+# Expose port (Django default is 8000)
+EXPOSE 8000
 
-# Collect static files (using SQLite config from .env)
-RUN python manage.py collectstatic --noinput
-
-# Run gunicorn
-CMD gunicorn bionexus_gaia.wsgi:application
+# Run the application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
