@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/your-django-app:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/bionexus:latest .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/your-django-app:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/bionexus:latest
