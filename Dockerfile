@@ -5,6 +5,14 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Install system dependencies for geospatial libraries
+RUN apt-get update && apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    binutils \
+    libproj-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create working directory
 WORKDIR /app
 
