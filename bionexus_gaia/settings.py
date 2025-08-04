@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis'
     
     # Third-party apps
     'rest_framework',
@@ -59,14 +60,14 @@ INSTALLED_APPS = [
 ]
 
 # Add GeoDjango and other apps only if not using SQLite
-USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
-if not USE_SQLITE:
-    INSTALLED_APPS.append('django.contrib.gis')  # GeoDjango
-    INSTALLED_APPS.extend([
-        'bionexus_gaia.apps.biodiversity',
-        'bionexus_gaia.apps.ai',
-        'bionexus_gaia.apps.citizen',
-    ])
+# USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
+# if not USE_SQLITE:
+#     INSTALLED_APPS.append('django.contrib.gis')  # GeoDjango
+#     INSTALLED_APPS.extend([
+#         'bionexus_gaia.apps.biodiversity',
+#         'bionexus_gaia.apps.ai',
+#         'bionexus_gaia.apps.citizen',
+#     ])
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
