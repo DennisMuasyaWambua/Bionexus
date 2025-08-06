@@ -9,17 +9,16 @@ RUN apt-get update && apt-get install -y \
     libgeos-dev \
     libproj-dev \
     binutils \
-    && ln -s /usr/lib/x86_64-linux-gnu/libgdal.so.* /usr/lib/x86_64-linux-gnu/libgdal.so \
+    && GDAL_SO=$(find /usr/lib/x86_64-linux-gnu -name "libgdal.so.*" | grep -v ".so.$" | head -n 1) \
+    && if [ -n "$GDAL_SO" ]; then ln -sf "$GDAL_SO" /usr/lib/x86_64-linux-gnu/libgdal.so; else echo "GDAL .so not found"; fi \
     && rm -rf /var/lib/apt/lists/*
 
-ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
 ENV GDAL_DATA=/usr/share/gdal
 ENV PROJ_LIB=/usr/share/proj
 
 WORKDIR /app
 
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
