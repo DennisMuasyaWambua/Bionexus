@@ -35,7 +35,6 @@ RUN groupadd -r django && useradd -r -g django django
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y \
     libpq5 \
-    libgdal32 \
     libgdal-dev \
     gdal-bin \
     && rm -rf /var/lib/apt/lists/*
