@@ -37,8 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure GDAL is discoverable
-ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+# Ensure GDAL is discoverable
 ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+
+# Add symlink so anything expecting /usr/lib/libgdal.so also works
+RUN ln -s /usr/lib/x86_64-linux-gnu/libgdal.so /usr/lib/libgdal.so
+
 
 # Copy virtual environment from builder
 COPY --from=builder /opt/venv /opt/venv
