@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set GDAL environment variables
-
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
 ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
 
 # Create and activate virtual environment
