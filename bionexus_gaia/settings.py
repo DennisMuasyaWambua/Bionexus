@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-r0!d8fn=pb6r-7%+&#!v^04lxfwj1j5!zzbfzh5*giq!xm5g(f')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = True #os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -119,9 +119,9 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': os.getenv('DB_NAME', 'bionexus_gaia'),
+            'NAME': os.getenv('DB_NAME', 'bionexus'),
             'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'Muasya254;'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
         }
@@ -162,7 +162,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = 'staticfiles/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
@@ -232,4 +232,4 @@ SPECTACULAR_SETTINGS = {
 # GDAL Settings - Only enabled when not using SQLite
 if not USE_SQLITE:
     GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
-    GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'
+    GEOS_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgeos_c.so'

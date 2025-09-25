@@ -14,6 +14,8 @@ This guide provides comprehensive instructions for using the BioNexus Gaia API, 
 8. [Web3 Integration](#web3-integration)
 9. [API Permissions](#api-permissions)
 10. [Error Handling](#error-handling)
+11. [PostGIS Spatial Features](#postgis-spatial-features)
+12. [Advanced Usage](#advanced-usage)
 
 ## Getting Started
 
@@ -161,31 +163,104 @@ Biodiversity records are the core data of the platform. They represent observati
 
 ### Creating a Biodiversity Record
 
-To create a new biodiversity record, make a multipart form POST request:
+To create a new biodiversity record with PostGIS spatial data, make a multipart form POST request:
 
 ```http
 POST /api/v1/biodiversity/records/
+Content-Type: application/json
+Authorization: Bearer your_access_token
+```
+
+**JSON Payload Example:**
+```json
+{
+    "species_name": "Pinus sylvestris",
+    "common_name": "Scots Pine",
+    "latitude": 60.1695,
+    "longitude": 24.9354,
+    "location_name": "Helsinki Central Park",
+    "observation_date": "2024-01-15T14:30:00Z",
+    "notes": "Large specimen near the walking trail",
+    "is_public": true,
+    "ai_prediction": "Pinus sylvestris",
+    "ai_confidence": 0.95
+}
+```
+
+**Response:**
+```json
+{
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "contributor": "user123",
+    "contributor_username": "naturalist_joe",
+    "species_name": "Pinus sylvestris",
+    "common_name": "Scots Pine",
+    "location": "POINT(24.9354 60.1695)",
+    "latitude": 60.1695,
+    "longitude": 24.9354,
+    "location_name": "Helsinki Central Park",
+    "observation_date": "2024-01-15T14:30:00Z",
+    "is_verified": false,
+    "created_at": "2024-01-15T14:35:22Z"
+}
 ```
 
 Required fields:
-- `image`: File upload of the observed species
-- `latitude`: Geographical coordinate (e.g., 40.7128)
-- `longitude`: Geographical coordinate (e.g., -74.0060)
+- `latitude`: Geographical coordinate (WGS84 decimal degrees, e.g., 60.1695)
+- `longitude`: Geographical coordinate (WGS84 decimal degrees, e.g., 24.9354)
 - `observation_date`: ISO format date-time (e.g., 2023-06-15T14:30:00Z)
 
 Optional fields:
-- `species_name`: Scientific name (e.g., "Quercus rubra")
-- `common_name`: Common name (e.g., "Northern Red Oak")
-- `location_name`: Text description of location (e.g., "Central Park")
+- `species_name`: Scientific name (e.g., "Pinus sylvestris")
+- `common_name`: Common name (e.g., "Scots Pine")
+- `location_name`: Text description of location (e.g., "Helsinki Central Park")
 - `notes`: Additional observations
 - `is_public`: Boolean (default: true)
+- `image`: File upload of the observed species
 - `audio`: File upload (audio recording)
 - `video`: File upload (video recording)
+- `ai_prediction`: AI-suggested species name
+- `ai_confidence`: AI confidence score (0.0-1.0)
+
+**Note:** Coordinates are automatically converted to PostGIS Point geometry with SRID 4326 (WGS84).
 
 ### Listing and Filtering Records
 
 ```http
 GET /api/v1/biodiversity/records/
+```
+
+**Basic Listing:**
+```http
+GET /api/v1/biodiversity/records/
+```
+
+**Spatial Filtering (PostGIS Proximity Search):**
+```http
+GET /api/v1/biodiversity/records/?lat=60.1695&lng=24.9354&radius=5
+```
+
+**Response Example:**
+```json
+{
+    "count": 25,
+    "next": "http://example.com/api/v1/biodiversity/records/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "species_name": "Pinus sylvestris",
+            "common_name": "Scots Pine",
+            "location": "POINT(24.9354 60.1695)",
+            "latitude": 60.1695,
+            "longitude": 24.9354,
+            "location_name": "Helsinki Central Park",
+            "observation_date": "2024-01-15T14:30:00Z",
+            "is_verified": false,
+            "contributor_username": "naturalist_joe"
+        }
+    ]
+}
 ```
 
 Available filters:
@@ -196,17 +271,47 @@ Available filters:
 - `observation_date_max`: Filter by date (to)
 - `is_verified`: Filter by blockchain verification status
 - `contributor_id`: Filter by user ID
-- `lat`, `lng`, `radius`: Filter by geographic radius (in km)
 
-### Exporting Data
+**PostGIS Spatial Filters:**
+- `lat`: Latitude for proximity search (decimal degrees)
+- `lng`: Longitude for proximity search (decimal degrees) 
+- `radius`: Search radius in kilometers (used with lat/lng)
+
+### Exporting Spatial Data
+
+Export biodiversity records with geographic coordinates:
 
 ```http
-GET /api/v1/biodiversity/records/export/?format=csv
+GET /api/v1/biodiversity/records/export/?format=json
 ```
 
+**JSON Export Response:**
+```json
+[
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "contributor": "naturalist_joe",
+        "species_name": "Pinus sylvestris",
+        "common_name": "Scots Pine",
+        "latitude": 60.1695,
+        "longitude": 24.9354,
+        "location_name": "Helsinki Central Park",
+        "observation_date": "2024-01-15T14:30:00Z",
+        "notes": "Large specimen near the walking trail",
+        "ai_confidence": 0.95,
+        "is_verified": false,
+        "created_at": "2024-01-15T14:35:22Z"
+    }
+]
+```
+
+**CSV Export:** Contains the same data in comma-separated format, suitable for GIS software import.
+
 Available formats:
-- `csv`: Comma-separated values
-- `json`: JSON format
+- `csv`: Comma-separated values (includes latitude/longitude columns)
+- `json`: JSON format with spatial coordinates
+
+**Note:** Exported data includes extracted latitude/longitude coordinates from PostGIS Point geometry for easy use in GIS applications and mapping tools.
 
 ### Blockchain Validation
 
@@ -288,7 +393,63 @@ GET /api/v1/ai/taxonomy/{species_name}/
 
 ## Citizen Science Features
 
-The citizen science module allows users to participate in biodiversity missions and contribute to conservation efforts.
+The citizen science module allows users to participate in biodiversity missions and contribute to conservation efforts. Missions support PostGIS polygon boundaries for defining geographic areas.
+
+### Creating a Mission (Admin Only)
+
+Create a new mission with a geographic boundary:
+
+```http
+POST /api/v1/citizen/missions/
+Content-Type: application/json
+Authorization: Bearer admin_access_token
+```
+
+**JSON Payload:**
+```json
+{
+    "title": "Urban Wildlife Survey - Helsinki",
+    "description": "Document wildlife species in urban Helsinki parks",
+    "start_date": "2024-03-01T00:00:00Z",
+    "end_date": "2024-03-31T23:59:59Z",
+    "target_species": ["Sciurus vulgaris", "Corvus cornix", "Turdus pilaris"],
+    "location_name": "Helsinki Metropolitan Area",
+    "area_coordinates": [
+        [
+            [24.9100, 60.1500],
+            [25.0000, 60.1500],
+            [25.0000, 60.2000],
+            [24.9100, 60.2000],
+            [24.9100, 60.1500]
+        ]
+    ],
+    "points_reward": 50,
+    "badge_reward": "Urban Explorer",
+    "nft_reward": "helsinki_wildlife_2024",
+    "is_active": true
+}
+```
+
+**Response:**
+```json
+{
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "title": "Urban Wildlife Survey - Helsinki",
+    "description": "Document wildlife species in urban Helsinki parks",
+    "start_date": "2024-03-01T00:00:00Z",
+    "end_date": "2024-03-31T23:59:59Z",
+    "target_species": ["Sciurus vulgaris", "Corvus cornix", "Turdus pilaris"],
+    "location_name": "Helsinki Metropolitan Area",
+    "area": "POLYGON((24.91 60.15, 25.0 60.15, 25.0 60.2, 24.91 60.2, 24.91 60.15))",
+    "points_reward": 50,
+    "is_active": true,
+    "participants_count": 0,
+    "observations_count": 0,
+    "created_at": "2024-02-15T10:00:00Z"
+}
+```
+
+**Note:** The `area_coordinates` field accepts GeoJSON-style polygon coordinates and is converted to PostGIS Polygon geometry with SRID 4326.
 
 ### Joining a Mission
 
@@ -307,16 +468,58 @@ The citizen science module allows users to participate in biodiversity missions 
    POST /api/v1/citizen/missions/{mission_id}/join/
    ```
 
+**Join Response:**
+```json
+{
+    "id": "770e8400-e29b-41d4-a716-446655440002",
+    "user": "user123",
+    "username": "naturalist_joe",
+    "mission": "660e8400-e29b-41d4-a716-446655440001",
+    "mission_title": "Urban Wildlife Survey - Helsinki",
+    "joined_at": "2024-02-20T14:30:00Z",
+    "completed_at": null,
+    "observations_count": 0,
+    "points_earned": 0,
+    "is_completed": false
+}
+```
+
 ### Submitting Observations for Missions
+
+Link a biodiversity record to a mission for points and participation:
 
 ```http
 POST /api/v1/citizen/observations/
+Content-Type: application/json
+Authorization: Bearer your_access_token
 ```
 
+**JSON Payload:**
 ```json
 {
-    "biodiversity_record": "record_uuid",
-    "mission": "mission_uuid"
+    "biodiversity_record": "550e8400-e29b-41d4-a716-446655440000",
+    "mission": "660e8400-e29b-41d4-a716-446655440001"
+}
+```
+
+**Response:**
+```json
+{
+    "id": "880e8400-e29b-41d4-a716-446655440003",
+    "biodiversity_record": "550e8400-e29b-41d4-a716-446655440000",
+    "biodiversity_record_data": {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "species_name": "Pinus sylvestris",
+        "common_name": "Scots Pine",
+        "observation_date": "2024-01-15T14:30:00Z",
+        "image": "https://example.com/media/biodiversity/image_123.jpg"
+    },
+    "mission": "660e8400-e29b-41d4-a716-446655440001",
+    "mission_title": "Urban Wildlife Survey - Helsinki",
+    "user": "user123",
+    "username": "naturalist_joe",
+    "points_awarded": 50,
+    "created_at": "2024-02-20T15:00:00Z"
 }
 ```
 
@@ -331,13 +534,43 @@ Available periods:
 - `month`: Current month
 - `week`: Current week
 
-### Viewing the Biodiversity Map
+### Viewing the Interactive Biodiversity Map
+
+Get spatial data for map visualization with PostGIS coordinates:
 
 ```http
 GET /api/v1/citizen/map/
 ```
 
-This returns geospatial data for display on an interactive map.
+**Response:**
+```json
+[
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "species_name": "Pinus sylvestris",
+        "common_name": "Scots Pine",
+        "latitude": 60.1695,
+        "longitude": 24.9354,
+        "observation_date": "2024-01-15T14:30:00Z",
+        "image_url": "https://example.com/media/biodiversity/image_123.jpg",
+        "contributor_username": "naturalist_joe",
+        "is_verified": false
+    },
+    {
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "species_name": "Sciurus vulgaris",
+        "common_name": "Red Squirrel",
+        "latitude": 60.1720,
+        "longitude": 24.9400,
+        "observation_date": "2024-01-16T09:15:00Z",
+        "image_url": "https://example.com/media/biodiversity/image_124.jpg",
+        "contributor_username": "wildlife_watcher",
+        "is_verified": true
+    }
+]
+```
+
+This returns geospatial data extracted from PostGIS Point geometry for display on interactive maps. Limited to 1000 records for performance.
 
 ## User Management
 
@@ -459,6 +692,50 @@ Error responses include a JSON object with details:
 }
 ```
 
+## PostGIS Spatial Features
+
+The BioNexus Gaia platform leverages PostGIS for advanced geospatial functionality. All spatial data uses the WGS84 coordinate system (SRID 4326).
+
+### Supported Spatial Data Types
+
+1. **Point Geometry**: Used for biodiversity record locations
+   - Stored as PostGIS `POINT(longitude, latitude)`
+   - Accessible as separate `latitude` and `longitude` fields in API responses
+   - Supports distance-based queries and proximity searches
+
+2. **Polygon Geometry**: Used for citizen science mission boundaries  
+   - Stored as PostGIS `POLYGON` with coordinate rings
+   - Created from GeoJSON-style coordinate arrays
+   - Defines geographic areas for mission participation
+
+### Spatial Query Operations
+
+**Proximity Search:**
+```http
+GET /api/v1/biodiversity/records/?lat=60.1695&lng=24.9354&radius=5
+```
+Returns all records within 5 kilometers of the specified coordinates using PostGIS distance calculations.
+
+**Geographic Filtering:**
+- Radius searches use PostGIS `ST_DWithin` function
+- Distance calculations are performed on the Earth's surface (geography=True)
+- Supports kilometer-based radius filtering for intuitive distance queries
+
+### Coordinate System Details
+
+- **SRID**: 4326 (World Geodetic System 1984)
+- **Format**: Decimal degrees (e.g., latitude: 60.1695, longitude: 24.9354)
+- **Range**: Latitude: -90 to 90, Longitude: -180 to 180
+- **Precision**: Stored with full double precision for accurate location data
+
+### GIS Integration
+
+Exported data includes coordinate fields suitable for:
+- QGIS and ArcGIS import
+- Google Maps and OpenStreetMap integration  
+- GeoJSON format conversion
+- Shapefile generation
+
 ## Advanced Usage
 
 ### Filtering Biodiversity Records by Geographic Area
@@ -467,7 +744,7 @@ Error responses include a JSON object with details:
 GET /api/v1/biodiversity/records/?lat=40.7128&lng=-74.0060&radius=10
 ```
 
-This returns records within 10 kilometers of the specified coordinates.
+This returns records within 10 kilometers of the specified coordinates using PostGIS spatial indexing for optimal performance.
 
 ### Creating and Using AI Model Feedback Loop
 

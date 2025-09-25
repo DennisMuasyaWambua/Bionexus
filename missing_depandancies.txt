@@ -1,0 +1,19 @@
+  Critical Missing:
+  - GDAL>=3.4.1,<4.0.0 (essential for GeoDjango geospatial features)
+
+  Version Updates Needed:
+  - django-filter==23.5 (requirements shows 25.1 but 23.5 is installed)
+  - django-cors-headers==4.2.0 (update from 4.7.0)
+  - gunicorn==21.0.1 (update from 22.0.0)
+
+  System Dependencies (for GeoDjango):
+  # Ubuntu/Debian
+  sudo apt-get install gdal-bin libgdal-dev libgeos-dev binutils libproj-dev
+
+  Recommended Additions:
+  - redis==5.0.1 + celery==5.3.4 (background processing)
+  - sentry-sdk==1.40.0 (error monitoring)
+  - django-storages==1.14.2 (already installed but missing from requirements)
+
+  The project should run with the current dependencies, but adding GDAL to requirements.txt is
+  critical for GeoDjango functionality.
