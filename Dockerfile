@@ -61,7 +61,7 @@ RUN mkdir -p /app/staticfiles /app/media && \
 USER django
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic
 
 # Set environment variables
 ENV PYTHONPATH=/app
