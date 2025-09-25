@@ -76,7 +76,7 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:8000/admin/', timeout=10)"
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8080
 
 # Production command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
