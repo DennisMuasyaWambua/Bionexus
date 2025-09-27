@@ -74,10 +74,10 @@ ENV DJANGO_SETTINGS_MODULE=bionexus_gaia.settings
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/admin/', timeout=10)"
+    CMD python -c "import requests; requests.get('http://localhost:8080/api/v1/auth/register/', timeout=10)"
 
 # Expose port
 EXPOSE 8080
 
 # Production command
-CMD ["gunicorn", "--bind", "0.0.0.0:${PORT:-8080}", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
