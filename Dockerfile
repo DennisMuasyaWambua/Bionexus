@@ -80,4 +80,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 EXPOSE 8080
 
 # Production command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:${PORT:-8080}", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
