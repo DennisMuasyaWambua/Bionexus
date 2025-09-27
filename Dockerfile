@@ -66,7 +66,7 @@ USER django
 RUN python manage.py collectstatic --noinput
 # Migrate database
 RUN python manage.py makemigrations && \
-    python manage.py migrate --noinput
+    python manage.py migrate 
 
 # Django settings
 ENV PYTHONPATH=/app
