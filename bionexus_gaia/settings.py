@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, dj_database_url
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -117,15 +117,24 @@ if USE_SQLITE:
 else:
     # Using PostGIS for Railway deployment
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': os.getenv('DB_NAME', 'bionexus'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'Muasya254;'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        }
+        'default': dj_database_url.config(
+            engine='django.contrib.gis.db.backends.postgis',
+            default='postgres://postgres:Muasya254;@localhost:5432/bionexus',  # Fallback for development
+            conn_max_age=600,                # Optional: for connection persistence
+            conn_health_checks=True,         # Optional: for connection health checks (Django 4.1+)
+        )
     }
+
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+    #         'NAME': os.getenv('DB_NAME', 'bionexus'),
+    #         'USER': os.getenv('DB_USER', 'postgres'),
+    #         'PASSWORD': os.getenv('DB_PASSWORD', 'Muasya254;'),
+    #         'HOST': os.getenv('DB_HOST', 'localhost'),
+    #         'PORT': os.getenv('DB_PORT', '5432'),
+    #     }
+    # }
 
 
 # Password validation
