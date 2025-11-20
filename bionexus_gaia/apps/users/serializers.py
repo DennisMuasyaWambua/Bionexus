@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserActivity
+from .models import UserActivity, Notification, Project, ProjectParticipation, Reward
 
 User = get_user_model()
 
@@ -16,10 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 
             'wallet_address', 'wallet_type', 'bio', 'profile_image',
+            'role', 'onboarding_completed', 'onboarding_step',
+            'oauth_provider', 'oauth_id',
             'total_points', 'observations_count', 'badges',
             'notification_preferences', 'date_joined'
         ]
-        read_only_fields = ['id', 'total_points', 'observations_count', 'badges', 'date_joined']
+        read_only_fields = ['id', 'total_points', 'observations_count', 'badges', 'date_joined', 'oauth_id']
 
 
 class UserActivitySerializer(serializers.ModelSerializer):
@@ -165,3 +167,100 @@ class UserStatsSerializer(serializers.Serializer):
     total_points = serializers.IntegerField()
     badges = serializers.ListField()
     leaderboard_position = serializers.IntegerField()
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for notifications.
+    """
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'title', 'message', 'notification_type', 'read', 
+            'created_at', 'action_url', 'metadata'
+        ]
+        read_only_fields = ['id', 'created_at']
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    """
+    Serializer for projects.
+    """
+    creator_username = serializers.CharField(source='creator.username', read_only=True)
+    participant_count = serializers.SerializerMethodField()
+    user_joined = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Project
+        fields = [
+            'id', 'title', 'description', 'short_description', 'image',
+            'creator', 'creator_username', 'status', 'max_participants',
+            'participant_count', 'user_joined', 'start_date', 'end_date',
+            'created_at', 'updated_at', 'tags', 'requirements', 'rewards_description'
+        ]
+        read_only_fields = ['id', 'creator', 'creator_username', 'participant_count', 'user_joined', 'created_at', 'updated_at']
+    
+    def get_participant_count(self, obj):
+        return obj.participants.filter(projectparticipation__is_active=True).count()
+    
+    def get_user_joined(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.participants.filter(
+                id=request.user.id,
+                projectparticipation__is_active=True
+            ).exists()
+        return False
+
+
+class ProjectParticipationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for project participation.
+    """
+    username = serializers.CharField(source='user.username', read_only=True)
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    
+    class Meta:
+        model = ProjectParticipation
+        fields = [
+            'id', 'user', 'username', 'project', 'project_title',
+            'joined_at', 'role', 'contributions_count', 'is_active'
+        ]
+        read_only_fields = ['id', 'username', 'project_title', 'joined_at']
+
+
+class RewardSerializer(serializers.ModelSerializer):
+    """
+    Serializer for rewards.
+    """
+    username = serializers.CharField(source='user.username', read_only=True)
+    
+    class Meta:
+        model = Reward
+        fields = [
+            'id', 'user', 'username', 'title', 'description', 'reward_type',
+            'icon', 'points_value', 'earned_at', 'criteria', 'metadata', 'is_active'
+        ]
+        read_only_fields = ['id', 'username', 'earned_at']
+
+
+class GoogleOAuthSerializer(serializers.Serializer):
+    """
+    Serializer for Google OAuth authentication.
+    """
+    access_token = serializers.CharField()
+    role = serializers.ChoiceField(choices=User.ROLE_CHOICES, required=False)
+    
+    def validate(self, attrs):
+        # In a real implementation, validate the Google access token here
+        # This would involve calling Google's API to verify the token
+        return attrs
+
+
+class OnboardingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user onboarding.
+    """
+    class Meta:
+        model = User
+        fields = ['role', 'onboarding_step', 'onboarding_completed']

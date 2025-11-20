@@ -57,6 +57,11 @@ INSTALLED_APPS = [
     'bionexus_gaia.apps.ai',
     'bionexus_gaia.apps.biodiversity',
     'bionexus_gaia.apps.citizen',
+    'bionexus_gaia.apps.search',
+    'bionexus_gaia.apps.dashboard',
+    'bionexus_gaia.apps.education',
+    'bionexus_gaia.apps.community',
+    'bionexus_gaia.apps.submissions',
 ]
 
 # Add GeoDjango and other apps only if not using SQLite

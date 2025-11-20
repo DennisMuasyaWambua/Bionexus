@@ -1,0 +1,567 @@
+{
+	"info": {
+		"_postman_id": "f5e36d2d-2a88-40a6-9f3c-5b4e6a8f5f0a",
+		"name": "BioNexus Gaia API - Updated",
+		"description": "Complete API collection for the BioNexus Gaia platform with all new endpoints including Google OAuth, onboarding, search, notifications, projects, rewards, dashboard, and more.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123!\",\n    \"password2\": \"StrongPassword123!\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"bio\": \"I'm a conservation enthusiast.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"StrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login", ""]
+						}
+					}
+				},
+				{
+					"name": "Google OAuth Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"access_token\": \"google_access_token_here\",\n    \"role\": \"contributor\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/google/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "google", ""]
+						}
+					}
+				},
+				{
+					"name": "Web3 Wallet Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wallet_address\": \"0x1234567890123456789012345678901234567890\",\n    \"wallet_type\": \"metamask\",\n    \"signature\": \"mock_signature\",\n    \"message\": \"Please sign this message to authenticate\",\n    \"username\": \"web3user\",\n    \"email\": \"web3@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/wallet-register/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "wallet-register", ""]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/token/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "token", "refresh", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile", ""]
+						}
+					}
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\",\n    \"bio\": \"Updated bio\",\n    \"role\": \"researcher\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile", ""]
+						}
+					}
+				},
+				{
+					"name": "Get User Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/stats/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "stats", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Onboarding",
+			"item": [
+				{
+					"name": "Get Onboarding Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/onboarding/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "onboarding", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Onboarding Progress",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"contributor\",\n    \"onboarding_step\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/onboarding/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "onboarding", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/notifications/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "notifications", ""]
+						}
+					}
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/notifications/{{notification_id}}/mark_read/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "notifications", "{{notification_id}}", "mark_read", ""]
+						}
+					}
+				},
+				{
+					"name": "Mark All Notifications as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/notifications/mark_all_read/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "notifications", "mark_all_read", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "List Projects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/projects/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "projects", ""]
+						}
+					}
+				},
+				{
+					"name": "Create Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Marine Life Conservation Study\",\n    \"description\": \"A comprehensive study of marine biodiversity in coastal areas.\",\n    \"short_description\": \"Study marine life in coastal areas\",\n    \"max_participants\": 50,\n    \"start_date\": \"2024-01-15T00:00:00Z\",\n    \"end_date\": \"2024-12-15T23:59:59Z\",\n    \"tags\": [\"marine\", \"conservation\", \"research\"],\n    \"requirements\": \"Basic knowledge of marine biology preferred\",\n    \"rewards_description\": \"Participants will earn points and badges for contributions\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/projects/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "projects", ""]
+						}
+					}
+				},
+				{
+					"name": "Join Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/projects/{{project_id}}/join/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "projects", "{{project_id}}", "join", ""]
+						}
+					}
+				},
+				{
+					"name": "Leave Project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/projects/{{project_id}}/leave/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "projects", "{{project_id}}", "leave", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rewards",
+			"item": [
+				{
+					"name": "List User Rewards",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/rewards/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "rewards", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Overview",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "dashboard", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Global Search",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/search/?q=species",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "search", ""],
+							"query": [
+								{
+									"key": "q",
+									"value": "species"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Search Suggestions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/search/suggestions/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "search", "suggestions", ""]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notification_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "project_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

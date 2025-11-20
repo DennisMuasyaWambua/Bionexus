@@ -16,6 +16,8 @@ urlpatterns = [
     path('api/v1/citizen/', include('bionexus_gaia.apps.citizen.urls')),
     path('api/v1/auth/', include('bionexus_gaia.apps.users.auth_urls')),
     path('api/v1/users/', include('bionexus_gaia.apps.users.urls')),
+    path('api/v1/search/', include('bionexus_gaia.apps.search.urls')),
+    path('api/v1/dashboard/', include('bionexus_gaia.apps.dashboard.urls')),
     
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

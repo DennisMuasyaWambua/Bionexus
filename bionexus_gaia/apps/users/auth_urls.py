@@ -4,7 +4,8 @@ from .views import (
     RegisterView,
     CustomTokenObtainPairView,
     Web3RegisterView,
-    Web3AuthView
+    Web3AuthView,
+    GoogleOAuthView
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('wallet-register/', Web3RegisterView.as_view(), name='wallet-register'),
     path('wallet-connect/', Web3AuthView.as_view(), name='wallet-connect'),
+    path('google/', GoogleOAuthView.as_view(), name='google-oauth'),
 ]
