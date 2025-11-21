@@ -1,0 +1,3694 @@
+openapi: 3.0.3
+info:
+  title: BioNexus Gaia API
+  version: 1.0.0
+  description: API for BioNexus Gaia platform - Biodiversity conservation with blockchain
+    and AI
+paths:
+  /api/v1/ai/feedback/:
+    get:
+      operationId: ai_feedback_list
+      description: API endpoint for identification feedback.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIdentificationFeedbackList'
+          description: ''
+    post:
+      operationId: ai_feedback_create
+      description: API endpoint for identification feedback.
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationFeedback'
+          description: ''
+  /api/v1/ai/feedback/{id}/:
+    get:
+      operationId: ai_feedback_retrieve
+      description: API endpoint for identification feedback.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this identification feedback.
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationFeedback'
+          description: ''
+    put:
+      operationId: ai_feedback_update
+      description: API endpoint for identification feedback.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this identification feedback.
+        required: true
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IdentificationFeedbackRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationFeedback'
+          description: ''
+    patch:
+      operationId: ai_feedback_partial_update
+      description: API endpoint for identification feedback.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this identification feedback.
+        required: true
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIdentificationFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIdentificationFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIdentificationFeedbackRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationFeedback'
+          description: ''
+    delete:
+      operationId: ai_feedback_destroy
+      description: API endpoint for identification feedback.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this identification feedback.
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/ai/identify/:
+    post:
+      operationId: ai_identify_create
+      description: Process an identification request.
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Identification'
+          description: ''
+  /api/v1/ai/identify/batch/:
+    post:
+      operationId: ai_identify_batch_create
+      description: Process multiple identification requests at once.
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Identification'
+          description: ''
+  /api/v1/ai/models/:
+    get:
+      operationId: ai_models_list
+      description: API endpoint for AI model information.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAIModelList'
+          description: ''
+  /api/v1/ai/models/{id}/:
+    get:
+      operationId: ai_models_retrieve
+      description: API endpoint for AI model information.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this ai model.
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIModel'
+          description: ''
+  /api/v1/ai/models/info/:
+    get:
+      operationId: ai_models_info_retrieve
+      description: Get information about available AI models.
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIModel'
+          description: ''
+  /api/v1/ai/taxonomy/{species}/:
+    get:
+      operationId: ai_taxonomy_retrieve
+      description: Get taxonomic information for a species.
+      parameters:
+      - in: path
+        name: species
+        schema:
+          type: string
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/google/:
+    post:
+      operationId: auth_google_create
+      description: Authenticate or register user with Google OAuth.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GoogleOAuthRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleOAuth'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Custom JWT token view with additional user info.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: API endpoint for user registration (Web2).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/wallet-connect/:
+    post:
+      operationId: auth_wallet_connect_create
+      description: Authenticate user with Web3 wallet.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Web3AuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Web3AuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Web3AuthRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Web3Auth'
+          description: ''
+  /api/v1/auth/wallet-register/:
+    post:
+      operationId: auth_wallet_register_create
+      description: Register a new user with Web3 wallet.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Web3RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Web3RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Web3RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Web3Register'
+          description: ''
+  /api/v1/biodiversity/records/:
+    get:
+      operationId: biodiversity_records_list
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      parameters:
+      - in: query
+        name: common_name
+        schema:
+          type: string
+      - in: query
+        name: contributor_id
+        schema:
+          type: string
+      - in: query
+        name: is_verified
+        schema:
+          type: boolean
+      - in: query
+        name: location_name
+        schema:
+          type: string
+      - in: query
+        name: observation_date_max
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: observation_date_min
+        schema:
+          type: string
+          format: date-time
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: species_name
+        schema:
+          type: string
+      tags:
+      - biodiversity
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBiodiversityRecordList'
+          description: ''
+    post:
+      operationId: biodiversity_records_create
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      tags:
+      - biodiversity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+  /api/v1/biodiversity/records/{id}/:
+    get:
+      operationId: biodiversity_records_retrieve
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this biodiversity record.
+        required: true
+      tags:
+      - biodiversity
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+    put:
+      operationId: biodiversity_records_update
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this biodiversity record.
+        required: true
+      tags:
+      - biodiversity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+    patch:
+      operationId: biodiversity_records_partial_update
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this biodiversity record.
+        required: true
+      tags:
+      - biodiversity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBiodiversityRecordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBiodiversityRecordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBiodiversityRecordRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+    delete:
+      operationId: biodiversity_records_destroy
+      description: |-
+        API endpoint for biodiversity records.
+
+        list:
+            Return a list of all biodiversity records.
+
+        create:
+            Create a new biodiversity record.
+
+        retrieve:
+            Return the given biodiversity record.
+
+        update:
+            Update the given biodiversity record.
+
+        partial_update:
+            Update part of the given biodiversity record.
+
+        destroy:
+            Delete the given biodiversity record.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this biodiversity record.
+        required: true
+      tags:
+      - biodiversity
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/biodiversity/records/{id}/validate/:
+    post:
+      operationId: biodiversity_records_validate_create
+      description: |-
+        Validate a biodiversity record on the blockchain.
+        This is a placeholder for the actual blockchain integration.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this biodiversity record.
+        required: true
+      tags:
+      - biodiversity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BiodiversityRecordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+  /api/v1/biodiversity/records/export/:
+    get:
+      operationId: biodiversity_records_export_retrieve
+      description: Export biodiversity records as CSV or JSON.
+      tags:
+      - biodiversity
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiodiversityRecord'
+          description: ''
+  /api/v1/citizen/leaderboard/:
+    get:
+      operationId: citizen_leaderboard_list
+      description: API endpoint for the community leaderboard.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLeaderboardEntryList'
+          description: ''
+  /api/v1/citizen/map/:
+    get:
+      operationId: citizen_map_list
+      description: API endpoint for the interactive biodiversity map.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMapDataList'
+          description: ''
+  /api/v1/citizen/missions/:
+    get:
+      operationId: citizen_missions_list
+      description: API endpoint for citizen science missions.
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMissionList'
+          description: ''
+    post:
+      operationId: citizen_missions_create
+      description: API endpoint for citizen science missions.
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+  /api/v1/citizen/missions/{id}/:
+    get:
+      operationId: citizen_missions_retrieve
+      description: API endpoint for citizen science missions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this mission.
+        required: true
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+    put:
+      operationId: citizen_missions_update
+      description: API endpoint for citizen science missions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this mission.
+        required: true
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+    patch:
+      operationId: citizen_missions_partial_update
+      description: API endpoint for citizen science missions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this mission.
+        required: true
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMissionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMissionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMissionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+    delete:
+      operationId: citizen_missions_destroy
+      description: API endpoint for citizen science missions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this mission.
+        required: true
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/citizen/missions/{id}/join/:
+    post:
+      operationId: citizen_missions_join_create
+      description: Join a mission.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this mission.
+        required: true
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+  /api/v1/citizen/observations/:
+    get:
+      operationId: citizen_observations_list
+      description: API endpoint for citizen science observations.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCitizenObservationList'
+          description: ''
+    post:
+      operationId: citizen_observations_create
+      description: API endpoint for citizen science observations.
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenObservation'
+          description: ''
+  /api/v1/citizen/observations/{id}/:
+    get:
+      operationId: citizen_observations_retrieve
+      description: API endpoint for citizen science observations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this citizen observation.
+        required: true
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenObservation'
+          description: ''
+    put:
+      operationId: citizen_observations_update
+      description: API endpoint for citizen science observations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this citizen observation.
+        required: true
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CitizenObservationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenObservation'
+          description: ''
+    patch:
+      operationId: citizen_observations_partial_update
+      description: API endpoint for citizen science observations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this citizen observation.
+        required: true
+      tags:
+      - citizen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCitizenObservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCitizenObservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCitizenObservationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenObservation'
+          description: ''
+    delete:
+      operationId: citizen_observations_destroy
+      description: API endpoint for citizen science observations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this citizen observation.
+        required: true
+      tags:
+      - citizen
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/dashboard/:
+    get:
+      operationId: dashboard_retrieve
+      description: Get dashboard overview data for the authenticated user.
+      tags:
+      - dashboard
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/search/:
+    get:
+      operationId: search_retrieve
+      description: Global search endpoint that searches across multiple models.
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/search/suggestions/:
+    get:
+      operationId: search_suggestions_retrieve
+      description: Get search suggestions based on user activity and popular content.
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/activities/:
+    get:
+      operationId: users_activities_list
+      description: API endpoint for user activity history.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserActivityList'
+          description: ''
+  /api/v1/users/activities/{id}/:
+    get:
+      operationId: users_activities_retrieve
+      description: API endpoint for user activity history.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivity'
+          description: ''
+  /api/v1/users/notifications/:
+    get:
+      operationId: users_notifications_list
+      description: API endpoint for user notifications.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+    post:
+      operationId: users_notifications_create
+      description: API endpoint for user notifications.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/users/notifications/{id}/:
+    get:
+      operationId: users_notifications_retrieve
+      description: API endpoint for user notifications.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    put:
+      operationId: users_notifications_update
+      description: API endpoint for user notifications.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: users_notifications_partial_update
+      description: API endpoint for user notifications.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    delete:
+      operationId: users_notifications_destroy
+      description: API endpoint for user notifications.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/notifications/{id}/mark_read/:
+    post:
+      operationId: users_notifications_mark_read_create
+      description: Mark a notification as read.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/users/notifications/mark_all_read/:
+    post:
+      operationId: users_notifications_mark_all_read_create
+      description: Mark all notifications as read.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/users/onboarding/:
+    get:
+      operationId: users_onboarding_retrieve
+      description: Get current onboarding status and available steps.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Onboarding'
+          description: ''
+    post:
+      operationId: users_onboarding_create
+      description: Update onboarding progress.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Onboarding'
+          description: ''
+  /api/v1/users/profile/:
+    get:
+      operationId: users_profile_retrieve
+      description: API endpoint for user profile.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: users_profile_update
+      description: API endpoint for user profile.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_profile_partial_update
+      description: API endpoint for user profile.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/projects/:
+    get:
+      operationId: users_projects_list
+      description: API endpoint for projects.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectList'
+          description: ''
+    post:
+      operationId: users_projects_create
+      description: API endpoint for projects.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/users/projects/{id}/:
+    get:
+      operationId: users_projects_retrieve
+      description: API endpoint for projects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    put:
+      operationId: users_projects_update
+      description: API endpoint for projects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    patch:
+      operationId: users_projects_partial_update
+      description: API endpoint for projects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    delete:
+      operationId: users_projects_destroy
+      description: API endpoint for projects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/projects/{id}/join/:
+    post:
+      operationId: users_projects_join_create
+      description: Join a project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/users/projects/{id}/leave/:
+    post:
+      operationId: users_projects_leave_create
+      description: Leave a project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this project.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/users/rewards/:
+    get:
+      operationId: users_rewards_list
+      description: API endpoint for user rewards.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRewardList'
+          description: ''
+  /api/v1/users/rewards/{id}/:
+    get:
+      operationId: users_rewards_retrieve
+      description: API endpoint for user rewards.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reward'
+          description: ''
+  /api/v1/users/stats/:
+    get:
+      operationId: users_stats_retrieve
+      description: Get detailed statistics for the authenticated user.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStats'
+          description: ''
+components:
+  schemas:
+    AIModel:
+      type: object
+      description: Serializer for AI models.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        version:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+        model_type:
+          type: string
+          maxLength: 50
+        accuracy:
+          type: number
+          format: double
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+      required:
+      - accuracy
+      - created_at
+      - description
+      - id
+      - model_type
+      - name
+      - updated_at
+      - version
+    BiodiversityRecord:
+      type: object
+      description: Serializer for BiodiversityRecord model with support for geospatial
+        data.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        contributor:
+          type: string
+          format: uuid
+          readOnly: true
+        contributor_username:
+          type: string
+          readOnly: true
+        species_name:
+          type: string
+          maxLength: 255
+        common_name:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+          format: uri
+        audio:
+          type: string
+          format: uri
+          nullable: true
+        video:
+          type: string
+          format: uri
+          nullable: true
+        location:
+          type: string
+          readOnly: true
+        location_name:
+          type: string
+          maxLength: 255
+        observation_date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        is_public:
+          type: boolean
+        ai_prediction:
+          nullable: true
+        ai_confidence:
+          type: number
+          format: double
+          nullable: true
+        blockchain_hash:
+          type: string
+          readOnly: true
+        is_verified:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - blockchain_hash
+      - contributor
+      - contributor_username
+      - created_at
+      - id
+      - image
+      - is_verified
+      - location
+      - observation_date
+      - updated_at
+    BiodiversityRecordRequest:
+      type: object
+      description: Serializer for BiodiversityRecord model with support for geospatial
+        data.
+      properties:
+        species_name:
+          type: string
+          maxLength: 255
+        common_name:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+          format: binary
+        audio:
+          type: string
+          format: binary
+          nullable: true
+        video:
+          type: string
+          format: binary
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        location_name:
+          type: string
+          maxLength: 255
+        observation_date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        is_public:
+          type: boolean
+        ai_prediction:
+          nullable: true
+        ai_confidence:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - image
+      - latitude
+      - longitude
+      - observation_date
+    BlankEnum:
+      enum:
+      - ''
+    CitizenObservation:
+      type: object
+      description: Serializer for citizen science observations.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        biodiversity_record:
+          type: string
+          format: uuid
+        biodiversity_record_data:
+          type: string
+          readOnly: true
+        mission:
+          type: string
+          format: uuid
+          nullable: true
+        mission_title:
+          type: string
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        points_awarded:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - biodiversity_record
+      - biodiversity_record_data
+      - created_at
+      - id
+      - mission_title
+      - points_awarded
+      - user
+      - username
+    CitizenObservationRequest:
+      type: object
+      description: Serializer for citizen science observations.
+      properties:
+        biodiversity_record:
+          type: string
+          format: uuid
+        mission:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - biodiversity_record
+    CustomTokenObtainPairRequest:
+      type: object
+      description: Custom JWT token serializer with additional user info.
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    GoogleOAuth:
+      type: object
+      description: Serializer for Google OAuth authentication.
+      properties:
+        access_token:
+          type: string
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - access_token
+    GoogleOAuthRequest:
+      type: object
+      description: Serializer for Google OAuth authentication.
+      properties:
+        access_token:
+          type: string
+          minLength: 1
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - access_token
+    Identification:
+      type: object
+      description: Serializer for species identification requests.
+      properties:
+        image:
+          type: string
+          format: uri
+        audio:
+          type: string
+          format: uri
+        video:
+          type: string
+          format: uri
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        observation_date:
+          type: string
+          format: date-time
+    IdentificationFeedback:
+      type: object
+      description: Serializer for identification feedback.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_username:
+          type: string
+          readOnly: true
+        biodiversity_record:
+          type: string
+          format: uuid
+        ai_model:
+          type: string
+          format: uuid
+        original_prediction: {}
+        corrected_species:
+          type: string
+          maxLength: 255
+        confidence:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ai_model
+      - biodiversity_record
+      - corrected_species
+      - created_at
+      - id
+      - original_prediction
+      - user
+      - user_username
+    IdentificationFeedbackRequest:
+      type: object
+      description: Serializer for identification feedback.
+      properties:
+        biodiversity_record:
+          type: string
+          format: uuid
+        ai_model:
+          type: string
+          format: uuid
+        original_prediction: {}
+        corrected_species:
+          type: string
+          minLength: 1
+          maxLength: 255
+        confidence:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+      required:
+      - ai_model
+      - biodiversity_record
+      - corrected_species
+      - original_prediction
+    IdentificationRequest:
+      type: object
+      description: Serializer for species identification requests.
+      properties:
+        image:
+          type: string
+          format: binary
+        audio:
+          type: string
+          format: binary
+        video:
+          type: string
+          format: binary
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        observation_date:
+          type: string
+          format: date-time
+    LeaderboardEntry:
+      type: object
+      description: Serializer for leaderboard entries.
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        total_points:
+          type: integer
+        observations_count:
+          type: integer
+        missions_completed:
+          type: integer
+        rank:
+          type: integer
+      required:
+      - missions_completed
+      - observations_count
+      - rank
+      - total_points
+      - user_id
+      - username
+    MapData:
+      type: object
+      description: Serializer for biodiversity map data.
+      properties:
+        id:
+          type: string
+          format: uuid
+        species_name:
+          type: string
+        common_name:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        observation_date:
+          type: string
+          format: date-time
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+        contributor_username:
+          type: string
+        is_verified:
+          type: boolean
+      required:
+      - common_name
+      - contributor_username
+      - id
+      - image_url
+      - is_verified
+      - latitude
+      - longitude
+      - observation_date
+      - species_name
+    Mission:
+      type: object
+      description: Serializer for citizen science missions.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        target_species:
+          nullable: true
+        location_name:
+          type: string
+          maxLength: 255
+        area:
+          type: string
+          readOnly: true
+          nullable: true
+        points_reward:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        badge_reward:
+          type: string
+          maxLength: 255
+        nft_reward:
+          type: boolean
+        is_active:
+          type: boolean
+        participants_count:
+          type: integer
+          readOnly: true
+        observations_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - area
+      - created_at
+      - description
+      - id
+      - observations_count
+      - participants_count
+      - start_date
+      - title
+      - updated_at
+    MissionRequest:
+      type: object
+      description: Serializer for citizen science missions.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          minLength: 1
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        target_species:
+          nullable: true
+        location_name:
+          type: string
+          maxLength: 255
+        area_coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+                format: double
+          writeOnly: true
+        points_reward:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        badge_reward:
+          type: string
+          maxLength: 255
+        nft_reward:
+          type: boolean
+        is_active:
+          type: boolean
+      required:
+      - description
+      - start_date
+      - title
+    Notification:
+      type: object
+      description: Serializer for notifications.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        message:
+          type: string
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        action_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        metadata:
+          nullable: true
+      required:
+      - created_at
+      - id
+      - message
+      - title
+    NotificationRequest:
+      type: object
+      description: Serializer for notifications.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        read:
+          type: boolean
+        action_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        metadata:
+          nullable: true
+      required:
+      - message
+      - title
+    NotificationTypeEnum:
+      enum:
+      - general
+      - achievement
+      - mission
+      - observation
+      - project
+      - reward
+      type: string
+      description: |-
+        * `general` - General
+        * `achievement` - Achievement
+        * `mission` - Mission
+        * `observation` - Observation
+        * `project` - Project
+        * `reward` - Reward
+    NullEnum:
+      enum:
+      - null
+    OauthProviderEnum:
+      enum:
+      - google
+      - github
+      - facebook
+      type: string
+      description: |-
+        * `google` - Google
+        * `github` - GitHub
+        * `facebook` - Facebook
+    Onboarding:
+      type: object
+      description: Serializer for user onboarding.
+      properties:
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        onboarding_step:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        onboarding_completed:
+          type: boolean
+    OnboardingRequest:
+      type: object
+      description: Serializer for user onboarding.
+      properties:
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        onboarding_step:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        onboarding_completed:
+          type: boolean
+    PaginatedAIModelList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIModel'
+    PaginatedBiodiversityRecordList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BiodiversityRecord'
+    PaginatedCitizenObservationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CitizenObservation'
+    PaginatedIdentificationFeedbackList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationFeedback'
+    PaginatedLeaderboardEntryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
+    PaginatedMapDataList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MapData'
+    PaginatedMissionList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mission'
+    PaginatedNotificationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedProjectList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    PaginatedRewardList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reward'
+    PaginatedUserActivityList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserActivity'
+    PatchedBiodiversityRecordRequest:
+      type: object
+      description: Serializer for BiodiversityRecord model with support for geospatial
+        data.
+      properties:
+        species_name:
+          type: string
+          maxLength: 255
+        common_name:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+          format: binary
+        audio:
+          type: string
+          format: binary
+          nullable: true
+        video:
+          type: string
+          format: binary
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        location_name:
+          type: string
+          maxLength: 255
+        observation_date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        is_public:
+          type: boolean
+        ai_prediction:
+          nullable: true
+        ai_confidence:
+          type: number
+          format: double
+          nullable: true
+    PatchedCitizenObservationRequest:
+      type: object
+      description: Serializer for citizen science observations.
+      properties:
+        biodiversity_record:
+          type: string
+          format: uuid
+        mission:
+          type: string
+          format: uuid
+          nullable: true
+    PatchedIdentificationFeedbackRequest:
+      type: object
+      description: Serializer for identification feedback.
+      properties:
+        biodiversity_record:
+          type: string
+          format: uuid
+        ai_model:
+          type: string
+          format: uuid
+        original_prediction: {}
+        corrected_species:
+          type: string
+          minLength: 1
+          maxLength: 255
+        confidence:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+    PatchedMissionRequest:
+      type: object
+      description: Serializer for citizen science missions.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          minLength: 1
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        target_species:
+          nullable: true
+        location_name:
+          type: string
+          maxLength: 255
+        area_coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+                format: double
+          writeOnly: true
+        points_reward:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        badge_reward:
+          type: string
+          maxLength: 255
+        nft_reward:
+          type: boolean
+        is_active:
+          type: boolean
+    PatchedNotificationRequest:
+      type: object
+      description: Serializer for notifications.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        read:
+          type: boolean
+        action_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        metadata:
+          nullable: true
+    PatchedProjectRequest:
+      type: object
+      description: Serializer for projects.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+        short_description:
+          type: string
+          minLength: 1
+          maxLength: 500
+        image:
+          type: string
+          format: binary
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        max_participants:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        tags:
+          nullable: true
+        requirements:
+          type: string
+        rewards_description:
+          type: string
+    PatchedUserRequest:
+      type: object
+      description: Serializer for the User model.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        wallet_address:
+          type: string
+          nullable: true
+          maxLength: 42
+        wallet_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        bio:
+          type: string
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        onboarding_completed:
+          type: boolean
+        onboarding_step:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        oauth_provider:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/OauthProviderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        notification_preferences:
+          nullable: true
+    Project:
+      type: object
+      description: Serializer for projects.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        short_description:
+          type: string
+          maxLength: 500
+        image:
+          type: string
+          format: uri
+          nullable: true
+        creator:
+          type: string
+          format: uuid
+          readOnly: true
+        creator_username:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        max_participants:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        participant_count:
+          type: string
+          readOnly: true
+        user_joined:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tags:
+          nullable: true
+        requirements:
+          type: string
+        rewards_description:
+          type: string
+      required:
+      - created_at
+      - creator
+      - creator_username
+      - description
+      - id
+      - participant_count
+      - short_description
+      - start_date
+      - title
+      - updated_at
+      - user_joined
+    ProjectRequest:
+      type: object
+      description: Serializer for projects.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+        short_description:
+          type: string
+          minLength: 1
+          maxLength: 500
+        image:
+          type: string
+          format: binary
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        max_participants:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        tags:
+          nullable: true
+        requirements:
+          type: string
+        rewards_description:
+          type: string
+      required:
+      - description
+      - short_description
+      - start_date
+      - title
+    Register:
+      type: object
+      description: Serializer for user registration (Web2).
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    RegisterRequest:
+      type: object
+      description: Serializer for user registration (Web2).
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+      - password2
+    Reward:
+      type: object
+      description: Serializer for rewards.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+        username:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        reward_type:
+          $ref: '#/components/schemas/RewardTypeEnum'
+        icon:
+          type: string
+          format: uri
+          nullable: true
+        points_value:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        earned_at:
+          type: string
+          format: date-time
+          readOnly: true
+        criteria:
+          type: string
+        metadata:
+          nullable: true
+        is_active:
+          type: boolean
+      required:
+      - criteria
+      - description
+      - earned_at
+      - id
+      - reward_type
+      - title
+      - user
+      - username
+    RewardTypeEnum:
+      enum:
+      - badge
+      - points
+      - certificate
+      - nft
+      - token
+      type: string
+      description: |-
+        * `badge` - Badge
+        * `points` - Points
+        * `certificate` - Certificate
+        * `nft` - NFT
+        * `token` - Token
+    RoleEnum:
+      enum:
+      - contributor
+      - researcher
+      - expert
+      type: string
+      description: |-
+        * `contributor` - Contributor
+        * `researcher` - Researcher
+        * `expert` - Expert
+    StatusEnum:
+      enum:
+      - active
+      - completed
+      - paused
+      - draft
+      type: string
+      description: |-
+        * `active` - Active
+        * `completed` - Completed
+        * `paused` - Paused
+        * `draft` - Draft
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    User:
+      type: object
+      description: Serializer for the User model.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        wallet_address:
+          type: string
+          nullable: true
+          maxLength: 42
+        wallet_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        bio:
+          type: string
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        onboarding_completed:
+          type: boolean
+        onboarding_step:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        oauth_provider:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/OauthProviderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        oauth_id:
+          type: string
+          readOnly: true
+          nullable: true
+        total_points:
+          type: integer
+          readOnly: true
+        observations_count:
+          type: integer
+          readOnly: true
+        badges:
+          readOnly: true
+          nullable: true
+        notification_preferences:
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - badges
+      - date_joined
+      - email
+      - id
+      - oauth_id
+      - observations_count
+      - total_points
+      - username
+    UserActivity:
+      type: object
+      description: Serializer for user activity.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        activity_type:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        points_earned:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        metadata:
+          nullable: true
+      required:
+      - activity_type
+      - created_at
+      - description
+      - id
+      - user
+      - username
+    UserRequest:
+      type: object
+      description: Serializer for the User model.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        wallet_address:
+          type: string
+          nullable: true
+          maxLength: 42
+        wallet_type:
+          type: string
+          nullable: true
+          maxLength: 20
+        bio:
+          type: string
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        onboarding_completed:
+          type: boolean
+        onboarding_step:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        oauth_provider:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/OauthProviderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        notification_preferences:
+          nullable: true
+      required:
+      - email
+      - username
+    UserStats:
+      type: object
+      description: Serializer for user contribution statistics.
+      properties:
+        total_observations:
+          type: integer
+        verified_observations:
+          type: integer
+        total_missions:
+          type: integer
+        completed_missions:
+          type: integer
+        total_points:
+          type: integer
+        badges:
+          type: array
+          items: {}
+        leaderboard_position:
+          type: integer
+      required:
+      - badges
+      - completed_missions
+      - leaderboard_position
+      - total_missions
+      - total_observations
+      - total_points
+      - verified_observations
+    Web3Auth:
+      type: object
+      description: Serializer for Web3 wallet authentication.
+      properties:
+        wallet_address:
+          type: string
+          maxLength: 42
+        signature:
+          type: string
+        message:
+          type: string
+      required:
+      - message
+      - signature
+      - wallet_address
+    Web3AuthRequest:
+      type: object
+      description: Serializer for Web3 wallet authentication.
+      properties:
+        wallet_address:
+          type: string
+          minLength: 1
+          maxLength: 42
+        signature:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+      required:
+      - message
+      - signature
+      - wallet_address
+    Web3Register:
+      type: object
+      description: Serializer for Web3 wallet-based registration.
+      properties:
+        wallet_address:
+          type: string
+          maxLength: 42
+        wallet_type:
+          type: string
+          maxLength: 20
+        signature:
+          type: string
+        message:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+      - message
+      - signature
+      - wallet_address
+      - wallet_type
+    Web3RegisterRequest:
+      type: object
+      description: Serializer for Web3 wallet-based registration.
+      properties:
+        wallet_address:
+          type: string
+          minLength: 1
+          maxLength: 42
+        wallet_type:
+          type: string
+          minLength: 1
+          maxLength: 20
+        signature:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - message
+      - signature
+      - wallet_address
+      - wallet_type
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

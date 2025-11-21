@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "f5e36d2d-2a88-40a6-9f3c-5b4e6a8f5f0a",
 		"name": "BioNexus Gaia API - Updated",
-		"description": "Complete API collection for the BioNexus Gaia platform with all new endpoints including Google OAuth, onboarding, search, notifications, projects, rewards, dashboard, and more.",
+		"description": "Complete API collection for the BioNexus Gaia platform. Updated November 2024 with simplified registration (email/password only), AI services, biodiversity records, citizen science missions, comprehensive user management, and all major platform features.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -21,14 +21,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123!\",\n    \"password2\": \"StrongPassword123!\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"bio\": \"I'm a conservation enthusiast.\"\n}"
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123!\",\n    \"password2\": \"StrongPassword123!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/register/",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "register", ""]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Login User",
@@ -482,6 +483,383 @@
 			]
 		},
 		{
+			"name": "AI Services",
+			"item": [
+				{
+					"name": "List AI Models",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/models/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "models", ""]
+						}
+					}
+				},
+				{
+					"name": "Get AI Model Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/models/info/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "models", "info", ""]
+						}
+					}
+				},
+				{
+					"name": "Species Identification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "model_name",
+									"value": "plant_identification",
+									"type": "text"
+								},
+								{
+									"key": "confidence_threshold",
+									"value": "0.7",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/identify/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "identify", ""]
+						}
+					}
+				},
+				{
+					"name": "Batch Species Identification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "model_name",
+									"value": "plant_identification",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/identify/batch/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "identify", "batch", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Species Taxonomy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/taxonomy/{{species_name}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "taxonomy", "{{species_name}}", ""]
+						}
+					}
+				},
+				{
+					"name": "List AI Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/feedback/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "feedback", ""]
+						}
+					}
+				},
+				{
+					"name": "Submit AI Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"identification_id\": \"{{identification_id}}\",\n    \"feedback_type\": \"correct\",\n    \"correct_species\": \"Quercus alba\",\n    \"comments\": \"The identification was accurate\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ai/feedback/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ai", "feedback", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Biodiversity",
+			"item": [
+				{
+					"name": "List Biodiversity Records",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "biodiversity", "records", ""]
+						}
+					}
+				},
+				{
+					"name": "Create Biodiversity Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"species_name\": \"Quercus alba\",\n    \"common_name\": \"White Oak\",\n    \"observation_date\": \"2024-11-21\",\n    \"latitude\": 40.7128,\n    \"longitude\": -74.0060,\n    \"habitat\": \"Forest\",\n    \"notes\": \"Large mature tree observed in Central Park\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/biodiversity/records/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "biodiversity", "records", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Citizen Science",
+			"item": [
+				{
+					"name": "List Missions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/missions/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "citizen", "missions", ""]
+						}
+					}
+				},
+				{
+					"name": "List Observations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/observations/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "citizen", "observations", ""]
+						}
+					}
+				},
+				{
+					"name": "Create Observation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "mission",
+									"value": "{{mission_id}}",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "notes",
+									"value": "Beautiful specimen found near the lake",
+									"type": "text"
+								},
+								{
+									"key": "latitude",
+									"value": "40.7128",
+									"type": "text"
+								},
+								{
+									"key": "longitude",
+									"value": "-74.0060",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/citizen/observations/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "citizen", "observations", ""]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Search",
 			"item": [
 				{
@@ -560,6 +938,21 @@
 		},
 		{
 			"key": "project_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "species_name",
+			"value": "Quercus_alba",
+			"type": "string"
+		},
+		{
+			"key": "identification_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "mission_id",
 			"value": "",
 			"type": "string"
 		}
