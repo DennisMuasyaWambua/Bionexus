@@ -173,24 +173,29 @@ class BatchIdentificationAPIView(generics.GenericAPIView):
         return Response(results, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-def taxonomy_view(request, species):
+class TaxonomyAPIView(generics.GenericAPIView):
     """
     Get taxonomic information for a species.
     """
-    # Mock taxonomy data (in production, this would call a taxonomy database or API)
-    mock_taxonomy = {
-        "kingdom": "Animalia",
-        "phylum": "Chordata",
-        "class_name": "Mammalia",
-        "order": "Carnivora",
-        "family": "Felidae",
-        "genus": "Panthera",
-        "species": species,
-        "common_names": ["Lion", "African Lion"]
-    }
+    serializer_class = TaxonomySerializer
     
-    serializer = TaxonomySerializer(data=mock_taxonomy)
-    serializer.is_valid()
-    
-    return Response(serializer.data)
+    def get(self, request, species, *args, **kwargs):
+        """
+        Get taxonomic information for a species.
+        """
+        # Mock taxonomy data (in production, this would call a taxonomy database or API)
+        mock_taxonomy = {
+            "kingdom": "Animalia",
+            "phylum": "Chordata",
+            "class_name": "Mammalia",
+            "order": "Carnivora",
+            "family": "Felidae",
+            "genus": "Panthera",
+            "species": species,
+            "common_names": ["Lion", "African Lion"]
+        }
+        
+        serializer = self.get_serializer(data=mock_taxonomy)
+        serializer.is_valid()
+        
+        return Response(serializer.data)

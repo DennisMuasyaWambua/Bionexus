@@ -5,7 +5,7 @@ from .views import (
     IdentificationFeedbackViewSet,
     IdentificationAPIView,
     BatchIdentificationAPIView,
-    taxonomy_view
+    TaxonomyAPIView
 )
 
 router = DefaultRouter()
@@ -16,5 +16,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('identify/', IdentificationAPIView.as_view(), name='identify'),
     path('identify/batch/', BatchIdentificationAPIView.as_view(), name='batch-identify'),
-    path('taxonomy/<str:species>/', taxonomy_view, name='taxonomy'),
+    path('taxonomy/<str:species>/', TaxonomyAPIView.as_view(), name='taxonomy'),
 ]

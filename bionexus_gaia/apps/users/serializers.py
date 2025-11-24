@@ -164,19 +164,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Custom JWT token serializer with additional user info and email-based login.
     """
-    username_field = User.USERNAME_FIELD
+    email = serializers.EmailField()
+    
+    class Meta:
+        fields = ['email', 'password']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Remove username field first
-        self.fields.pop('username', None)
-        # Create a new ordered dict with email first, then password
-        from collections import OrderedDict
-        new_fields = OrderedDict()
-        new_fields['email'] = serializers.EmailField(required=True)
-        if 'password' in self.fields:
-            new_fields['password'] = self.fields['password']
-        self.fields = new_fields
+        # Replace username field with email field
+        del self.fields['username']
+        self.fields['email'] = serializers.EmailField(required=True)
     
     def validate(self, attrs):
         email = attrs.get('email')

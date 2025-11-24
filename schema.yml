@@ -313,7 +313,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Taxonomy'
+          description: ''
   /api/v1/auth/accept-terms/:
     post:
       operationId: accept_terms
@@ -416,7 +420,11 @@ paths:
         required: true
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomTokenObtainPair'
+          description: ''
   /api/v1/auth/register/:
     post:
       operationId: auth_register_create
@@ -2402,21 +2410,32 @@ components:
           nullable: true
       required:
       - biodiversity_record
+    CustomTokenObtainPair:
+      type: object
+      description: Custom JWT token serializer with additional user info and email-based
+        login.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
     CustomTokenObtainPairRequest:
       type: object
-      description: Custom JWT token serializer with additional user info.
+      description: Custom JWT token serializer with additional user info and email-based
+        login.
       properties:
-        username:
+        email:
           type: string
-          writeOnly: true
+          format: email
           minLength: 1
         password:
           type: string
           writeOnly: true
           minLength: 1
       required:
+      - email
       - password
-      - username
     EmailVerificationRequest:
       type: object
       description: |-
@@ -3652,6 +3671,37 @@ components:
         * `completed` - Completed
         * `paused` - Paused
         * `draft` - Draft
+    Taxonomy:
+      type: object
+      description: Serializer for taxonomy data.
+      properties:
+        kingdom:
+          type: string
+        phylum:
+          type: string
+        class_name:
+          type: string
+        order:
+          type: string
+        family:
+          type: string
+        genus:
+          type: string
+        species:
+          type: string
+        common_names:
+          type: array
+          items:
+            type: string
+      required:
+      - class_name
+      - common_names
+      - family
+      - genus
+      - kingdom
+      - order
+      - phylum
+      - species
     TokenRefresh:
       type: object
       properties:

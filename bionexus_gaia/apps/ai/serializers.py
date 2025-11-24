@@ -61,11 +61,11 @@ class TaxonomySerializer(serializers.Serializer):
     """
     Serializer for taxonomy data.
     """
-    kingdom = serializers.CharField()
-    phylum = serializers.CharField()
-    class_name = serializers.CharField()
-    order = serializers.CharField()
-    family = serializers.CharField()
-    genus = serializers.CharField()
-    species = serializers.CharField()
-    common_names = serializers.ListField(child=serializers.CharField())
+    kingdom = serializers.CharField(required=True)
+    phylum = serializers.CharField(required=True)
+    class_name = serializers.CharField(required=True)
+    order = serializers.CharField(required=True)
+    family = serializers.CharField(required=True)
+    genus = serializers.CharField(required=True)
+    species = serializers.CharField(required=True)
+    common_names = serializers.ListField(child=serializers.CharField(), required=True)
