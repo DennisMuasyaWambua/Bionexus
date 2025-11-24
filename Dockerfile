@@ -65,8 +65,9 @@ USER django
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-RUN python manage.py makemigrations --noinput && \
-    python manage.py migrate --noinput
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 # Django settings
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -80,5 +81,6 @@ ENV DJANGO_SETTINGS_MODULE=bionexus_gaia.settings
 # Expose port
 EXPOSE 8080
 
-# Production command
+# Set entrypoint and command
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "120", "bionexus_gaia.wsgi:application"]
