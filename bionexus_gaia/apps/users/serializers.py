@@ -168,8 +168,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['email'] = serializers.EmailField()
+        # Remove username field first
         self.fields.pop('username', None)
+        # Create a new ordered dict with email first, then password
+        from collections import OrderedDict
+        new_fields = OrderedDict()
+        new_fields['email'] = serializers.EmailField()
+        new_fields['password'] = self.fields['password']
+        self.fields = new_fields
     
     def validate(self, attrs):
         email = attrs.get('email')
