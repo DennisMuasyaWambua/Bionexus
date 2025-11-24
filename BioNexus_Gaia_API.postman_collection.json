@@ -52,7 +52,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"StrongPassword123!\"\n}"
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"StrongPassword123!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/login/",
@@ -67,7 +67,7 @@
 								""
 							]
 						},
-						"description": "Login with username and password to get JWT access token."
+						"description": "Login with email and password to get JWT access token."
 					},
 					"response": []
 				},

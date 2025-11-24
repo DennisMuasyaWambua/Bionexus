@@ -173,8 +173,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Create a new ordered dict with email first, then password
         from collections import OrderedDict
         new_fields = OrderedDict()
-        new_fields['email'] = serializers.EmailField()
-        new_fields['password'] = self.fields['password']
+        new_fields['email'] = serializers.EmailField(required=True)
+        if 'password' in self.fields:
+            new_fields['password'] = self.fields['password']
         self.fields = new_fields
     
     def validate(self, attrs):
