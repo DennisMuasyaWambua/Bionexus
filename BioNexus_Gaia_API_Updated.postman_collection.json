@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "f5e36d2d-2a88-40a6-9f3c-5b4e6a8f5f0a",
 		"name": "BioNexus Gaia API - Updated",
-		"description": "Complete API collection for the BioNexus Gaia platform. Updated November 2024 with simplified registration (email/password only), AI services, biodiversity records, citizen science missions, comprehensive user management, and all major platform features.",
+		"description": "Complete API collection for the BioNexus Gaia platform. Updated November 2024 with simplified registration (email/password only), email verification with 6-digit codes, forgot password functionality, terms & conditions acceptance, AI services, biodiversity records, citizen science missions, comprehensive user management, and all major platform features.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -114,6 +114,139 @@
 							"path": ["api", "v1", "auth", "token", "refresh", ""]
 						}
 					}
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"verification_code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verify-email/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "verify-email", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/resend-verification/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "resend-verification", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/forgot-password/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "forgot-password", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{reset_token}}\",\n    \"new_password\": \"NewStrongPassword123!\",\n    \"confirm_password\": \"NewStrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/reset-password/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "reset-password", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Terms and Conditions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accept_terms\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/accept-terms/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "accept-terms", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Terms Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/terms-status/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "terms-status", ""]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -953,6 +1086,11 @@
 		},
 		{
 			"key": "mission_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "reset_token",
 			"value": "",
 			"type": "string"
 		}

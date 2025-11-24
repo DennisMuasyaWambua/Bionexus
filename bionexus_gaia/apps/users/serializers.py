@@ -3,7 +3,10 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserActivity, Notification, Project, ProjectParticipation, Reward
+from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -42,6 +45,9 @@ class UserActivitySerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for user registration (Web2).
+    
+    Handles user registration with email and password only.
+    Automatically sends a 6-digit verification code via email after successful registration.
     """
     email = serializers.EmailField(
         required=True,
@@ -93,7 +99,41 @@ class RegisterSerializer(serializers.ModelSerializer):
             points_earned=10
         )
         
+        # Send email verification
+        self.send_verification_email(user)
+        
         return user
+    
+    def send_verification_email(self, user):
+        """Send verification email with 6-digit code."""
+        verification = EmailVerification.objects.create(user=user)
+        
+        subject = 'Verify your BioNexus Gaia account'
+        message = f'''
+Hello {user.username},
+
+Thank you for registering with BioNexus Gaia!
+
+Your verification code is: {verification.verification_code}
+
+This code will expire in 15 minutes.
+
+Please use this code to verify your email address.
+
+Best regards,
+BioNexus Gaia Team
+        '''
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            pass
 
 
 class Web3RegisterSerializer(serializers.Serializer):
@@ -268,3 +308,196 @@ class OnboardingSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['role', 'onboarding_step', 'onboarding_completed']
+
+
+class EmailVerificationSerializer(serializers.Serializer):
+    """
+    Serializer for email verification.
+    
+    Used to verify user's email address using a 6-digit code sent via email.
+    The verification code expires after 15 minutes.
+    """
+    email = serializers.EmailField(help_text="The email address to verify")
+    verification_code = serializers.CharField(max_length=6, help_text="6-digit verification code sent via email")
+    
+    def validate(self, attrs):
+        email = attrs.get('email')
+        verification_code = attrs.get('verification_code')
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"email": "User with this email does not exist."})
+        
+        verification = EmailVerification.objects.filter(
+            user=user,
+            verification_code=verification_code,
+            is_used=False
+        ).first()
+        
+        if not verification:
+            raise serializers.ValidationError({"verification_code": "Invalid verification code."})
+        
+        if verification.is_expired():
+            raise serializers.ValidationError({"verification_code": "Verification code has expired."})
+        
+        attrs['user'] = user
+        attrs['verification'] = verification
+        return attrs
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    """
+    Serializer for resending verification email.
+    
+    Used to request a new verification code when the previous one has expired
+    or was not received.
+    """
+    email = serializers.EmailField(help_text="Email address to resend verification code to")
+    
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            if user.email_verified:
+                raise serializers.ValidationError("Email is already verified.")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+    
+    def send_verification_email(self, email):
+        """Send new verification email."""
+        user = User.objects.get(email=email)
+        
+        # Deactivate previous verification codes
+        EmailVerification.objects.filter(user=user, is_used=False).update(is_used=True)
+        
+        # Create new verification
+        verification = EmailVerification.objects.create(user=user)
+        
+        subject = 'Verify your BioNexus Gaia account'
+        message = f'''
+Hello {user.username},
+
+Your new verification code is: {verification.verification_code}
+
+This code will expire in 15 minutes.
+
+Please use this code to verify your email address.
+
+Best regards,
+BioNexus Gaia Team
+        '''
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            pass
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for forgot password functionality.
+    
+    Used to request a password reset email containing a secure reset link.
+    The reset token expires after 1 hour.
+    """
+    email = serializers.EmailField(help_text="Email address to send password reset link to")
+    
+    def validate_email(self, value):
+        try:
+            User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+    
+    def send_reset_email(self, email):
+        """Send password reset email."""
+        user = User.objects.get(email=email)
+        
+        # Deactivate previous reset tokens
+        PasswordResetToken.objects.filter(user=user, is_used=False).update(is_used=True)
+        
+        # Create new reset token
+        reset_token = PasswordResetToken.objects.create(user=user)
+        
+        # Create reset link (you'll need to update this with your frontend URL)
+        reset_link = f"https://bionexusgaia.com/reset-password?token={reset_token.token}"
+        
+        subject = 'Reset your BioNexus Gaia password'
+        message = f'''
+Hello {user.username},
+
+You requested a password reset for your BioNexus Gaia account.
+
+Click the link below to reset your password:
+{reset_link}
+
+This link will expire in 1 hour.
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+BioNexus Gaia Team
+        '''
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            pass
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for resetting password with token.
+    
+    Used to reset a user's password using a secure token received via email.
+    """
+    token = serializers.CharField(help_text="Password reset token received via email")
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password],
+        help_text="New password (must meet security requirements)"
+    )
+    confirm_password = serializers.CharField(write_only=True, required=True, help_text="Confirm new password")
+    
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords don't match."})
+        
+        token = attrs.get('token')
+        try:
+            reset_token = PasswordResetToken.objects.get(token=token, is_used=False)
+            if reset_token.is_expired():
+                raise serializers.ValidationError({"token": "Reset token has expired."})
+            attrs['reset_token'] = reset_token
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError({"token": "Invalid reset token."})
+        
+        return attrs
+
+
+class AcceptTermsSerializer(serializers.Serializer):
+    """
+    Serializer for accepting terms and conditions.
+    
+    Used to record user's acceptance of the platform's terms and conditions.
+    """
+    accept_terms = serializers.BooleanField(help_text="Must be true to accept terms and conditions")
+    
+    def validate_accept_terms(self, value):
+        if not value:
+            raise serializers.ValidationError("You must accept the terms and conditions.")
+        return value

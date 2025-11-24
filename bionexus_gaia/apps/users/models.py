@@ -1,7 +1,11 @@
 import uuid
+import random
+import string
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 class User(AbstractUser):
     """
@@ -46,6 +50,13 @@ class User(AbstractUser):
     
     # User settings
     notification_preferences = models.JSONField(default=dict, blank=True, null=True)
+    
+    # Email verification
+    email_verified = models.BooleanField(default=False)
+    
+    # Terms acceptance
+    terms_accepted = models.BooleanField(default=False)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
         verbose_name = _('user')
@@ -197,3 +208,69 @@ class Reward(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+
+
+class EmailVerification(models.Model):
+    """
+    Model for email verification codes.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verifications')
+    verification_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('email verification')
+        verbose_name_plural = _('email verifications')
+    
+    def save(self, *args, **kwargs):
+        if not self.verification_code:
+            self.verification_code = self.generate_verification_code()
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=15)
+        super().save(*args, **kwargs)
+    
+    def generate_verification_code(self):
+        return ''.join(random.choices(string.digits, k=6))
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.verification_code}"
+
+
+class PasswordResetToken(models.Model):
+    """
+    Model for password reset tokens.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('password reset token')
+        verbose_name_plural = _('password reset tokens')
+    
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = self.generate_token()
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=1)
+        super().save(*args, **kwargs)
+    
+    def generate_token(self):
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=64))
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.token[:8]}..."

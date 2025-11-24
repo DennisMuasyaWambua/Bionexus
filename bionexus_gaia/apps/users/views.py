@@ -4,6 +4,7 @@ from django.db.models import Count, Sum, Q
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -22,9 +23,15 @@ from .serializers import (
     ProjectParticipationSerializer,
     RewardSerializer,
     GoogleOAuthSerializer,
-    OnboardingSerializer
+    OnboardingSerializer,
+    EmailVerificationSerializer,
+    ResendVerificationSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
+    AcceptTermsSerializer
 )
-from .models import UserActivity, Notification, Project, ProjectParticipation, Reward
+from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken
+from django.utils import timezone
 # Temporarily disabled due to GDAL/GEOS dependency
 # from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
 # from bionexus_gaia.apps.citizen.models import MissionParticipation, CitizenObservation
@@ -500,3 +507,306 @@ class RewardViewSet(viewsets.ReadOnlyModelViewSet):
         Filter rewards to only show the current user's rewards.
         """
         return Reward.objects.filter(user=self.request.user, is_active=True)
+
+
+class EmailVerificationView(generics.GenericAPIView):
+    """
+    API endpoint for email verification.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = EmailVerificationSerializer
+    
+    @extend_schema(
+        operation_id="verify_email",
+        tags=["Authentication"],
+        summary="Verify email address",
+        description="Verify user's email address using a 6-digit verification code sent via email after registration.",
+        request=EmailVerificationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Email verified successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={
+                            "message": "Email verified successfully",
+                            "user": {
+                                "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "username": "testuser",
+                                "email": "test@example.com",
+                                "email_verified": True
+                            }
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Invalid verification code or expired code")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Verify user's email with 6-digit code.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = serializer.validated_data['user']
+        verification = serializer.validated_data['verification']
+        
+        # Mark verification as used
+        verification.is_used = True
+        verification.save()
+        
+        # Mark user's email as verified
+        user.email_verified = True
+        user.save()
+        
+        # Create activity
+        UserActivity.objects.create(
+            user=user,
+            activity_type='email_verification',
+            description='Email address verified successfully',
+            points_earned=5
+        )
+        
+        return Response({
+            'message': 'Email verified successfully',
+            'user': UserSerializer(user).data
+        })
+
+
+class ResendVerificationView(generics.GenericAPIView):
+    """
+    API endpoint for resending email verification.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = ResendVerificationSerializer
+    
+    @extend_schema(
+        operation_id="resend_verification_email",
+        tags=["Authentication"],
+        summary="Resend verification email",
+        description="Resend a new 6-digit verification code to the user's email address.",
+        request=ResendVerificationSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Verification email sent successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={"message": "Verification email sent successfully"}
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Email already verified or user not found")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Resend verification email.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        email = serializer.validated_data['email']
+        serializer.send_verification_email(email)
+        
+        return Response({
+            'message': 'Verification email sent successfully'
+        })
+
+
+class ForgotPasswordView(generics.GenericAPIView):
+    """
+    API endpoint for forgot password functionality.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = ForgotPasswordSerializer
+    
+    @extend_schema(
+        operation_id="forgot_password",
+        tags=["Authentication"],
+        summary="Request password reset",
+        description="Send a password reset email with a secure reset link. The reset token expires after 1 hour.",
+        request=ForgotPasswordSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Password reset email sent successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={"message": "Password reset email sent successfully"}
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="User with email not found")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Send password reset email.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        email = serializer.validated_data['email']
+        serializer.send_reset_email(email)
+        
+        return Response({
+            'message': 'Password reset email sent successfully'
+        })
+
+
+class ResetPasswordView(generics.GenericAPIView):
+    """
+    API endpoint for resetting password with token.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = ResetPasswordSerializer
+    
+    @extend_schema(
+        operation_id="reset_password",
+        tags=["Authentication"],
+        summary="Reset password with token",
+        description="Reset user's password using a secure token received via email.",
+        request=ResetPasswordSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Password reset successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={"message": "Password reset successfully"}
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Invalid or expired reset token")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Reset password using token.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        reset_token = serializer.validated_data['reset_token']
+        new_password = serializer.validated_data['new_password']
+        
+        # Update user password
+        user = reset_token.user
+        user.set_password(new_password)
+        user.save()
+        
+        # Mark token as used
+        reset_token.is_used = True
+        reset_token.save()
+        
+        # Create activity
+        UserActivity.objects.create(
+            user=user,
+            activity_type='password_reset',
+            description='Password reset successfully',
+            points_earned=0
+        )
+        
+        return Response({
+            'message': 'Password reset successfully'
+        })
+
+
+class AcceptTermsView(generics.GenericAPIView):
+    """
+    API endpoint for accepting terms and conditions.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = AcceptTermsSerializer
+    
+    @extend_schema(
+        operation_id="accept_terms",
+        tags=["Authentication"],
+        summary="Accept terms and conditions",
+        description="Record user's acceptance of the platform's terms and conditions.",
+        request=AcceptTermsSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Terms accepted successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={
+                            "message": "Terms and conditions accepted successfully",
+                            "user": {
+                                "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "terms_accepted": True,
+                                "terms_accepted_at": "2024-11-21T10:00:00Z"
+                            }
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Terms acceptance required")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Accept terms and conditions.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        user.terms_accepted = True
+        user.terms_accepted_at = timezone.now()
+        user.save()
+        
+        # Create activity
+        UserActivity.objects.create(
+            user=user,
+            activity_type='terms_acceptance',
+            description='Accepted terms and conditions',
+            points_earned=0
+        )
+        
+        return Response({
+            'message': 'Terms and conditions accepted successfully',
+            'user': UserSerializer(user).data
+        })
+
+
+class CheckTermsStatusView(generics.GenericAPIView):
+    """
+    API endpoint to check if user has accepted terms.
+    """
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        operation_id="check_terms_status",
+        tags=["Authentication"],
+        summary="Check terms and conditions status",
+        description="Check if terms and conditions acceptance is required for registration.",
+        responses={
+            200: OpenApiResponse(
+                description="Terms status information",
+                examples=[
+                    OpenApiExample(
+                        name="Terms Status Response",
+                        value={
+                            "terms_required": True,
+                            "terms_url": "/terms-and-conditions",
+                            "privacy_url": "/privacy-policy"
+                        }
+                    )
+                ]
+            )
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Check if terms need to be accepted before registration.
+        """
+        return Response({
+            'terms_required': True,
+            'terms_url': '/terms-and-conditions',
+            'privacy_url': '/privacy-policy'
+        })
