@@ -65,6 +65,10 @@ USER django
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+# Migrate database
+
+RUN python3 manage.py makemigrations && python3 manage.py migrate --noinput
+
 
 # Django settings
 ENV PYTHONPATH=/app
