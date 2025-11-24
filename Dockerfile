@@ -55,6 +55,10 @@ WORKDIR /app
 # Copy app code
 COPY . .
 
+# Copy entrypoint script and set permissions
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Static + media directories
 RUN mkdir -p /app/staticfiles /app/media && \
     chown -R django:django /app
@@ -64,10 +68,6 @@ USER django
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
-
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 # Django settings
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
