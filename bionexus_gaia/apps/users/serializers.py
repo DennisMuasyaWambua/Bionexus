@@ -20,9 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name', 
             'wallet_address', 'wallet_type', 'bio', 'profile_image',
             'role', 'onboarding_completed', 'onboarding_step',
+            'country', 'city', 'affiliation', 'contribution_method', 'skill_level',
             'oauth_provider', 'oauth_id',
             'total_points', 'observations_count', 'badges',
-            'notification_preferences', 'date_joined'
+            'notification_preferences', 'date_joined', 'email_verified'
         ]
         read_only_fields = ['id', 'total_points', 'observations_count', 'badges', 'date_joined', 'oauth_id']
 
@@ -326,6 +327,60 @@ class OnboardingSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['role', 'onboarding_step', 'onboarding_completed']
+
+
+class OnboardCompleteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for completing user onboarding with all required fields.
+    """
+    contribution_method = serializers.ListField(
+        child=serializers.ChoiceField(choices=[
+            'species_observation',
+            'habitat_restoration', 
+            'climate_advocacy',
+            'eco_photography',
+            'community_support'
+        ]),
+        allow_empty=False,
+        help_text="List of contribution methods the user is interested in"
+    )
+    
+    class Meta:
+        model = User
+        fields = [
+            'role', 'country', 'city', 'affiliation', 
+            'contribution_method', 'skill_level'
+        ]
+        
+    def validate_role(self, value):
+        if value not in ['contributor', 'researcher', 'expert']:
+            raise serializers.ValidationError("Role must be one of: contributor, researcher, expert")
+        return value
+        
+    def validate_affiliation(self, value):
+        valid_affiliations = [
+            'student', 'educator_researcher', 'policy_maker', 
+            'tech_enthusiast', 'climate_advocate', 'nature_enthusiast', 'media_personnel'
+        ]
+        if value not in valid_affiliations:
+            raise serializers.ValidationError(f"Affiliation must be one of: {', '.join(valid_affiliations)}")
+        return value
+        
+    def validate_skill_level(self, value):
+        if value not in ['beginner', 'enthusiast', 'expert']:
+            raise serializers.ValidationError("Skill level must be one of: beginner, enthusiast, expert")
+        return value
+        
+    def update(self, instance, validated_data):
+        # Update all the onboarding fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Mark onboarding as completed
+        instance.onboarding_completed = True
+        instance.save()
+        
+        return instance
 
 
 class EmailVerificationSerializer(serializers.Serializer):

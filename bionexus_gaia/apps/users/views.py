@@ -24,6 +24,7 @@ from .serializers import (
     RewardSerializer,
     GoogleOAuthSerializer,
     OnboardingSerializer,
+    OnboardCompleteSerializer,
     EmailVerificationSerializer,
     ResendVerificationSerializer,
     ForgotPasswordSerializer,
@@ -373,6 +374,93 @@ class OnboardingView(generics.GenericAPIView):
         return Response({
             'user': UserSerializer(user).data,
             'message': 'Onboarding updated successfully'
+        })
+
+
+class OnboardView(generics.GenericAPIView):
+    """
+    API endpoint for completing user onboarding after email verification.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OnboardCompleteSerializer
+    
+    @extend_schema(
+        operation_id="complete_onboarding",
+        tags=["User Onboarding"],
+        summary="Complete user onboarding",
+        description="Complete user onboarding process after successful email verification. Updates user profile with role, location, affiliation, contribution methods, and skill level.",
+        request=OnboardCompleteSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Onboarding completed successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={
+                            "message": "Onboarding completed successfully",
+                            "user": {
+                                "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "username": "testuser",
+                                "email": "test@example.com",
+                                "role": "contributor",
+                                "country": "United States",
+                                "city": "New York",
+                                "affiliation": "student",
+                                "contribution_method": ["species_observation", "eco_photography"],
+                                "skill_level": "beginner",
+                                "onboarding_completed": True
+                            }
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Validation errors or email not verified"),
+            401: OpenApiResponse(description="Authentication required")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Complete user onboarding with all required profile information.
+        """
+        user = request.user
+        
+        # Check if email is verified
+        if not user.email_verified:
+            return Response({
+                'error': 'Email must be verified before completing onboarding'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if onboarding is already completed
+        if user.onboarding_completed:
+            return Response({
+                'error': 'Onboarding has already been completed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = self.get_serializer(user, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        
+        # Update user with onboarding data
+        user = serializer.save()
+        
+        # Create onboarding completion activity
+        UserActivity.objects.create(
+            user=user,
+            activity_type='onboarding_completed',
+            description='Successfully completed onboarding process',
+            points_earned=25
+        )
+        
+        # Create welcome notification
+        Notification.objects.create(
+            user=user,
+            title='Welcome to BioNexus Gaia!',
+            message=f'Congratulations on completing your onboarding as a {user.get_role_display()}! Start exploring and contributing to our community.',
+            notification_type='general'
+        )
+        
+        return Response({
+            'message': 'Onboarding completed successfully',
+            'user': UserSerializer(user).data
         })
 
 

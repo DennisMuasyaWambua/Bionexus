@@ -18,6 +18,30 @@ class User(AbstractUser):
         ('expert', _('Expert')),
     ]
     
+    AFFILIATION_CHOICES = [
+        ('student', _('Student')),
+        ('educator_researcher', _('Educator/Researcher')),
+        ('policy_maker', _('Policy Maker')),
+        ('tech_enthusiast', _('Tech Enthusiast')),
+        ('climate_advocate', _('Climate Advocate')),
+        ('nature_enthusiast', _('Nature Enthusiast')),
+        ('media_personnel', _('Media Personnel')),
+    ]
+    
+    CONTRIBUTION_METHOD_CHOICES = [
+        ('species_observation', _('Species Observation')),
+        ('habitat_restoration', _('Habitat Restoration')),
+        ('climate_advocacy', _('Climate Advocacy')),
+        ('eco_photography', _('Eco Photography')),
+        ('community_support', _('Community Support')),
+    ]
+    
+    SKILL_LEVEL_CHOICES = [
+        ('beginner', _('Beginner')),
+        ('enthusiast', _('Enthusiast')),
+        ('expert', _('Expert')),
+    ]
+    
     OAUTH_PROVIDER_CHOICES = [
         ('google', _('Google')),
         ('github', _('GitHub')),
@@ -35,6 +59,13 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True, default='contributor')
     onboarding_completed = models.BooleanField(default=False)
     onboarding_step = models.IntegerField(default=0)
+    
+    # Additional onboarding fields
+    country = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    affiliation = models.CharField(max_length=30, choices=AFFILIATION_CHOICES, blank=True, null=True)
+    contribution_method = models.JSONField(default=list, blank=True, null=True)
+    skill_level = models.CharField(max_length=20, choices=SKILL_LEVEL_CHOICES, blank=True, null=True)
     
     # OAuth integration
     oauth_provider = models.CharField(max_length=20, choices=OAUTH_PROVIDER_CHOICES, blank=True, null=True)
@@ -274,3 +305,51 @@ class PasswordResetToken(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.token[:8]}..."
+
+
+class TermsAndConditions(models.Model):
+    """
+    Model for managing terms and conditions content and versions.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    version = models.CharField(max_length=20, unique=True)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    effective_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-effective_date']
+        verbose_name = _('terms and conditions')
+        verbose_name_plural = _('terms and conditions')
+    
+    def __str__(self):
+        return f"{self.title} - v{self.version}"
+    
+    @classmethod
+    def get_current_terms(cls):
+        """Get the current active terms and conditions."""
+        return cls.objects.filter(is_active=True).first()
+
+
+class UserTermsAcceptance(models.Model):
+    """
+    Model for tracking user acceptance of specific terms and conditions versions.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='terms_acceptances')
+    terms_version = models.ForeignKey(TermsAndConditions, on_delete=models.CASCADE, related_name='user_acceptances')
+    accepted_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField()
+    
+    class Meta:
+        unique_together = ['user', 'terms_version']
+        ordering = ['-accepted_at']
+        verbose_name = _('user terms acceptance')
+        verbose_name_plural = _('user terms acceptances')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.terms_version.version} - {self.accepted_at.date()}"

@@ -5,6 +5,7 @@ from .views import (
     UserStatsView,
     UserActivityViewSet,
     OnboardingView,
+    OnboardView,
     NotificationViewSet,
     ProjectViewSet,
     RewardViewSet
@@ -21,4 +22,5 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='user-profile'),
     path('stats/', UserStatsView.as_view(), name='user-stats'),
     path('onboarding/', OnboardingView.as_view(), name='onboarding'),
+    path('onboard/', OnboardView.as_view(), name='onboard'),
 ]
