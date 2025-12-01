@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken
+from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken, TermsAndConditions, UserTermsAcceptance
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -569,8 +569,47 @@ class AcceptTermsSerializer(serializers.Serializer):
     Used to record user's acceptance of the platform's terms and conditions.
     """
     accept_terms = serializers.BooleanField(help_text="Must be true to accept terms and conditions")
+    terms_version_id = serializers.UUIDField(required=False, help_text="Specific terms version to accept (optional - defaults to current)")
     
     def validate_accept_terms(self, value):
         if not value:
             raise serializers.ValidationError("You must accept the terms and conditions.")
         return value
+    
+    def validate_terms_version_id(self, value):
+        if value:
+            try:
+                TermsAndConditions.objects.get(id=value)
+            except TermsAndConditions.DoesNotExist:
+                raise serializers.ValidationError("Invalid terms version.")
+        return value
+
+
+class TermsAndConditionsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for terms and conditions content.
+    """
+    class Meta:
+        model = TermsAndConditions
+        fields = [
+            'id', 'version', 'title', 'content', 'effective_date', 
+            'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class UserTermsAcceptanceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user terms acceptance records.
+    """
+    username = serializers.CharField(source='user.username', read_only=True)
+    terms_version_title = serializers.CharField(source='terms_version.title', read_only=True)
+    terms_version_number = serializers.CharField(source='terms_version.version', read_only=True)
+    
+    class Meta:
+        model = UserTermsAcceptance
+        fields = [
+            'id', 'user', 'username', 'terms_version', 'terms_version_title', 
+            'terms_version_number', 'accepted_at', 'ip_address', 'user_agent'
+        ]
+        read_only_fields = ['id', 'username', 'terms_version_title', 'terms_version_number', 'accepted_at']

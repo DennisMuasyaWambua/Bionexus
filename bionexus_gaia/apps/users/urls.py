@@ -8,7 +8,9 @@ from .views import (
     OnboardView,
     NotificationViewSet,
     ProjectViewSet,
-    RewardViewSet
+    RewardViewSet,
+    TermsAndConditionsViewSet,
+    UserTermsAcceptanceViewSet
 )
 
 router = DefaultRouter()
@@ -16,6 +18,8 @@ router.register(r'activities', UserActivityViewSet, basename='user-activity')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'rewards', RewardViewSet, basename='reward')
+router.register(r'terms', TermsAndConditionsViewSet, basename='terms-and-conditions')
+router.register(r'terms-acceptances', UserTermsAcceptanceViewSet, basename='user-terms-acceptance')
 
 urlpatterns = [
     path('', include(router.urls)),

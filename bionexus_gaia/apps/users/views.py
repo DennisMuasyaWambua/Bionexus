@@ -29,9 +29,11 @@ from .serializers import (
     ResendVerificationSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
-    AcceptTermsSerializer
+    AcceptTermsSerializer,
+    TermsAndConditionsSerializer,
+    UserTermsAcceptanceSerializer
 )
-from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken
+from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken, TermsAndConditions, UserTermsAcceptance
 from django.utils import timezone
 # Temporarily disabled due to GDAL/GEOS dependency
 # from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
@@ -814,7 +816,7 @@ class AcceptTermsView(generics.GenericAPIView):
         operation_id="accept_terms",
         tags=["Authentication"],
         summary="Accept terms and conditions",
-        description="Record user's acceptance of the platform's terms and conditions.",
+        description="Record user's acceptance of the platform's terms and conditions. Optionally specify a specific version to accept, otherwise defaults to the current active version. Creates a detailed audit trail with IP address and user agent information.",
         request=AcceptTermsSerializer,
         responses={
             200: OpenApiResponse(
@@ -826,24 +828,75 @@ class AcceptTermsView(generics.GenericAPIView):
                             "message": "Terms and conditions accepted successfully",
                             "user": {
                                 "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "username": "testuser",
+                                "email": "test@example.com",
                                 "terms_accepted": True,
-                                "terms_accepted_at": "2024-11-21T10:00:00Z"
-                            }
+                                "terms_accepted_at": "2024-12-01T10:30:00Z"
+                            },
+                            "terms_version": "1.2"
                         }
                     )
                 ]
             ),
-            400: OpenApiResponse(description="Terms acceptance required")
+            400: OpenApiResponse(
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        name="Terms Required Error",
+                        value={"accept_terms": ["You must accept the terms and conditions."]}
+                    ),
+                    OpenApiExample(
+                        name="Invalid Version Error", 
+                        value={"terms_version_id": ["Invalid terms version."]}
+                    ),
+                    OpenApiExample(
+                        name="No Terms Available Error",
+                        value={"error": "No terms and conditions available"}
+                    )
+                ]
+            ),
+            401: OpenApiResponse(description="Authentication required")
         }
     )
     def post(self, request, *args, **kwargs):
         """
-        Accept terms and conditions.
+        Accept terms and conditions with version tracking.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         user = request.user
+        terms_version_id = serializer.validated_data.get('terms_version_id')
+        
+        # Get terms version to accept
+        if terms_version_id:
+            terms_version = TermsAndConditions.objects.get(id=terms_version_id)
+        else:
+            terms_version = TermsAndConditions.get_current_terms()
+            if not terms_version:
+                return Response({
+                    'error': 'No terms and conditions available'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get client IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        
+        # Get user agent
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        
+        # Create detailed acceptance record
+        UserTermsAcceptance.objects.create(
+            user=user,
+            terms_version=terms_version,
+            ip_address=ip,
+            user_agent=user_agent
+        )
+        
+        # Update basic user fields
         user.terms_accepted = True
         user.terms_accepted_at = timezone.now()
         user.save()
@@ -852,13 +905,14 @@ class AcceptTermsView(generics.GenericAPIView):
         UserActivity.objects.create(
             user=user,
             activity_type='terms_acceptance',
-            description='Accepted terms and conditions',
+            description=f'Accepted terms and conditions v{terms_version.version}',
             points_earned=0
         )
         
         return Response({
             'message': 'Terms and conditions accepted successfully',
-            'user': UserSerializer(user).data
+            'user': UserSerializer(user).data,
+            'terms_version': terms_version.version
         })
 
 
@@ -875,14 +929,16 @@ class CheckTermsStatusView(generics.GenericAPIView):
         description="Check if terms and conditions acceptance is required for registration.",
         responses={
             200: OpenApiResponse(
-                description="Terms status information",
+                description="Terms status information with current version details",
                 examples=[
                     OpenApiExample(
                         name="Terms Status Response",
                         value={
                             "terms_required": True,
                             "terms_url": "/terms-and-conditions",
-                            "privacy_url": "/privacy-policy"
+                            "privacy_url": "/privacy-policy",
+                            "current_terms_version": "1.2",
+                            "current_terms_id": "123e4567-e89b-12d3-a456-426614174000"
                         }
                     )
                 ]
@@ -893,8 +949,167 @@ class CheckTermsStatusView(generics.GenericAPIView):
         """
         Check if terms need to be accepted before registration.
         """
+        # Get current terms version
+        current_terms = TermsAndConditions.get_current_terms()
+        
         return Response({
             'terms_required': True,
             'terms_url': '/terms-and-conditions',
-            'privacy_url': '/privacy-policy'
+            'privacy_url': '/privacy-policy',
+            'current_terms_version': current_terms.version if current_terms else None,
+            'current_terms_id': str(current_terms.id) if current_terms else None
         })
+
+
+class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint for terms and conditions content.
+    """
+    serializer_class = TermsAndConditionsSerializer
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        operation_id="list_terms_and_conditions",
+        tags=["Terms and Conditions"],
+        summary="List all terms and conditions versions",
+        description="Retrieve all available terms and conditions versions, ordered by effective date.",
+        responses={
+            200: OpenApiResponse(
+                description="List of terms and conditions versions",
+                examples=[
+                    OpenApiExample(
+                        name="Terms List Response",
+                        value=[
+                            {
+                                "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "version": "1.2",
+                                "title": "Terms and Conditions",
+                                "content": "These terms govern your use of our platform...",
+                                "effective_date": "2024-12-01T00:00:00Z",
+                                "is_active": True,
+                                "created_at": "2024-11-15T10:00:00Z",
+                                "updated_at": "2024-11-15T10:00:00Z"
+                            }
+                        ]
+                    )
+                ]
+            )
+        }
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @extend_schema(
+        operation_id="retrieve_terms_and_conditions",
+        tags=["Terms and Conditions"],
+        summary="Retrieve specific terms and conditions version",
+        description="Get details of a specific terms and conditions version by ID.",
+        responses={
+            200: TermsAndConditionsSerializer,
+            404: OpenApiResponse(description="Terms version not found")
+        }
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        return TermsAndConditions.objects.all()
+    
+    @extend_schema(
+        operation_id="get_current_terms",
+        tags=["Terms and Conditions"],
+        summary="Get current active terms and conditions",
+        description="Retrieve the currently active terms and conditions that users must accept.",
+        responses={
+            200: OpenApiResponse(
+                description="Current active terms and conditions",
+                examples=[
+                    OpenApiExample(
+                        name="Current Terms Response",
+                        value={
+                            "id": "123e4567-e89b-12d3-a456-426614174000",
+                            "version": "1.2",
+                            "title": "Terms and Conditions",
+                            "content": "These terms govern your use of our platform...",
+                            "effective_date": "2024-12-01T00:00:00Z",
+                            "is_active": True,
+                            "created_at": "2024-11-15T10:00:00Z",
+                            "updated_at": "2024-11-15T10:00:00Z"
+                        }
+                    )
+                ]
+            ),
+            404: OpenApiResponse(description="No active terms and conditions found")
+        }
+    )
+    @action(detail=False, methods=['get'])
+    def current(self, request):
+        """
+        Get the current active terms and conditions.
+        """
+        terms = TermsAndConditions.get_current_terms()
+        if not terms:
+            return Response({
+                'error': 'No terms and conditions available'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.get_serializer(terms)
+        return Response(serializer.data)
+
+
+class UserTermsAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint for user terms acceptance history.
+    """
+    serializer_class = UserTermsAcceptanceSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        operation_id="list_user_terms_acceptances",
+        tags=["User Terms Acceptance"],
+        summary="List user's terms acceptance history",
+        description="Retrieve the authenticated user's complete terms and conditions acceptance history.",
+        responses={
+            200: OpenApiResponse(
+                description="User's terms acceptance history",
+                examples=[
+                    OpenApiExample(
+                        name="Acceptance History Response",
+                        value=[
+                            {
+                                "id": "123e4567-e89b-12d3-a456-426614174000",
+                                "user": "456e7890-e89b-12d3-a456-426614174000",
+                                "username": "testuser",
+                                "terms_version": "789e1234-e89b-12d3-a456-426614174000",
+                                "terms_version_title": "Terms and Conditions",
+                                "terms_version_number": "1.2",
+                                "accepted_at": "2024-12-01T10:30:00Z",
+                                "ip_address": "192.168.1.100",
+                                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+                            }
+                        ]
+                    )
+                ]
+            ),
+            401: OpenApiResponse(description="Authentication required")
+        }
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @extend_schema(
+        operation_id="retrieve_user_terms_acceptance",
+        tags=["User Terms Acceptance"],
+        summary="Retrieve specific terms acceptance record",
+        description="Get details of a specific terms acceptance record by ID.",
+        responses={
+            200: UserTermsAcceptanceSerializer,
+            404: OpenApiResponse(description="Acceptance record not found"),
+            401: OpenApiResponse(description="Authentication required")
+        }
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        return UserTermsAcceptance.objects.filter(user=self.request.user)

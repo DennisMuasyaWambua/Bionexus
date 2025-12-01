@@ -225,7 +225,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"accept_terms\": true\n}"
+							"raw": "{\n    \"accept_terms\": true,\n    \"terms_version_id\": \"{{terms_version_id}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/accept-terms/",
@@ -244,6 +244,96 @@
 							"raw": "{{base_url}}/api/v1/auth/terms-status/",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "terms-status", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Terms and Conditions",
+			"item": [
+				{
+					"name": "Get Current Terms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/terms/current/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "terms", "current", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List All Terms Versions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/terms/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "terms", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Specific Terms Version",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/terms/{{terms_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "terms", "{{terms_id}}", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Terms Acceptance History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/terms-acceptances/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "terms-acceptances", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Specific Terms Acceptance Record",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/terms-acceptances/{{acceptance_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "terms-acceptances", "{{acceptance_id}}", ""]
 						}
 					},
 					"response": []
