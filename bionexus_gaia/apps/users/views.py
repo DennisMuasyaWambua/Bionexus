@@ -30,6 +30,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     AcceptTermsSerializer,
+    AcceptTermsSimpleSerializer,
     TermsAndConditionsSerializer,
     UserTermsAcceptanceSerializer
 )
@@ -1055,6 +1056,165 @@ class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
         
         serializer = self.get_serializer(terms)
         return Response(serializer.data)
+    
+    @extend_schema(
+        operation_id="get_current_terms_structured",
+        tags=["Terms and Conditions"],
+        summary="Get current terms with structured content",
+        description="Retrieve the currently active terms with structured sections and complete metadata for easier frontend consumption.",
+        responses={
+            200: OpenApiResponse(
+                description="Current terms with structured content and metadata",
+                examples=[
+                    OpenApiExample(
+                        name="Structured Terms Response",
+                        value={
+                            "id": "terms_v1.0.0",
+                            "version": "1.0.0",
+                            "effectiveDate": "2025-12-01T00:00:00Z",
+                            "title": "Our Promise to You and Your Community",
+                            "sections": [
+                                {
+                                    "title": "Data Sovereignty",
+                                    "description": "Your data belongs to your community and your country first..."
+                                }
+                            ],
+                            "createdAt": "2025-12-01T00:00:00Z",
+                            "updatedAt": "2025-12-01T00:00:00Z"
+                        }
+                    )
+                ]
+            ),
+            404: OpenApiResponse(description="No active terms and conditions found")
+        }
+    )
+    @action(detail=False, methods=['get'], url_path='current/structured')
+    def current_structured(self, request):
+        """
+        Get the current active terms with structured content and metadata.
+        Returns terms in a structured format optimized for frontend consumption.
+        """
+        terms = TermsAndConditions.get_current_terms()
+        if not terms:
+            return Response({
+                'error': 'No terms and conditions available'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Return structured format
+        structured_data = {
+            "id": f"terms_v{terms.version}",
+            "version": terms.version,
+            "effectiveDate": terms.effective_date.isoformat(),
+            "title": terms.title,
+            "sections": terms.sections if terms.sections else [
+                # Fallback to default sections if none defined
+                {
+                    "title": "Terms and Conditions",
+                    "description": terms.content
+                }
+            ],
+            "createdAt": terms.created_at.isoformat(),
+            "updatedAt": terms.updated_at.isoformat()
+        }
+        
+        return Response(structured_data)
+    
+    @extend_schema(
+        operation_id="accept_terms_simple",
+        tags=["Terms and Conditions"],
+        summary="Accept terms and conditions (simplified)",
+        description="Simplified endpoint for accepting terms using structured version ID format. Accepts only a boolean and structured version ID.",
+        request=AcceptTermsSimpleSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Terms accepted successfully",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={
+                            "message": "Terms and conditions accepted successfully",
+                            "version_accepted": "1.0.0",
+                            "accepted_at": "2025-12-01T10:30:00Z"
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        name="Terms Required Error",
+                        value={"accepted": ["You must accept the terms and conditions."]}
+                    ),
+                    OpenApiExample(
+                        name="Invalid Version Error", 
+                        value={"version_id": ["Version ID must be in format 'terms_v{version}'"]}
+                    )
+                ]
+            ),
+            401: OpenApiResponse(description="Authentication required")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='accept', permission_classes=[IsAuthenticated])
+    def accept_simple(self, request):
+        """
+        Accept terms and conditions using simplified format.
+        Requires only accepted=true and optional structured version_id.
+        """
+        serializer = AcceptTermsSimpleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        version_id = serializer.validated_data.get('version_id')
+        
+        # Get terms version to accept
+        if version_id:
+            # Extract version from structured ID (e.g., "terms_v1.0.0" -> "1.0.0")
+            version = version_id[7:]  # Remove "terms_v" prefix
+            terms_version = TermsAndConditions.objects.get(version=version)
+        else:
+            terms_version = TermsAndConditions.get_current_terms()
+            if not terms_version:
+                return Response({
+                    'error': 'No terms and conditions available'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get client IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        
+        # Get user agent
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        
+        # Create detailed acceptance record
+        UserTermsAcceptance.objects.create(
+            user=user,
+            terms_version=terms_version,
+            ip_address=ip,
+            user_agent=user_agent
+        )
+        
+        # Update basic user fields
+        user.terms_accepted = True
+        user.terms_accepted_at = timezone.now()
+        user.save()
+        
+        # Create activity
+        UserActivity.objects.create(
+            user=user,
+            activity_type='terms_acceptance',
+            description=f'Accepted terms and conditions version {terms_version.version}',
+            metadata={'version': terms_version.version, 'ip_address': ip}
+        )
+        
+        return Response({
+            'message': 'Terms and conditions accepted successfully',
+            'version_accepted': terms_version.version,
+            'accepted_at': user.terms_accepted_at.isoformat()
+        })
 
 
 class UserTermsAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):

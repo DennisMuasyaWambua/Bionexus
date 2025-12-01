@@ -585,6 +585,32 @@ class AcceptTermsSerializer(serializers.Serializer):
         return value
 
 
+class AcceptTermsSimpleSerializer(serializers.Serializer):
+    """
+    Simplified serializer for accepting terms and conditions using structured version ID.
+    """
+    accepted = serializers.BooleanField(help_text="Must be true to accept terms and conditions")
+    version_id = serializers.CharField(required=False, help_text="Structured version ID like 'terms_v1.0.0' (optional - defaults to current)")
+    
+    def validate_accepted(self, value):
+        if not value:
+            raise serializers.ValidationError("You must accept the terms and conditions.")
+        return value
+    
+    def validate_version_id(self, value):
+        if value:
+            # Extract version from structured ID (e.g., "terms_v1.0.0" -> "1.0.0")
+            if value.startswith("terms_v"):
+                version = value[7:]  # Remove "terms_v" prefix
+                try:
+                    TermsAndConditions.objects.get(version=version)
+                except TermsAndConditions.DoesNotExist:
+                    raise serializers.ValidationError("Invalid terms version.")
+            else:
+                raise serializers.ValidationError("Version ID must be in format 'terms_v{version}'")
+        return value
+
+
 class TermsAndConditionsSerializer(serializers.ModelSerializer):
     """
     Serializer for terms and conditions content.

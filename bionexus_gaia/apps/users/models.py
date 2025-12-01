@@ -314,7 +314,8 @@ class TermsAndConditions(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     version = models.CharField(max_length=20, unique=True)
     title = models.CharField(max_length=200)
-    content = models.TextField()
+    content = models.TextField()  # Keep for backward compatibility
+    sections = models.JSONField(default=list, help_text="Structured sections for terms content")
     effective_date = models.DateTimeField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
