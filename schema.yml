@@ -322,6 +322,9 @@ paths:
     post:
       operationId: accept_terms
       description: Record user's acceptance of the platform's terms and conditions.
+        Optionally specify a specific version to accept, otherwise defaults to the
+        current active version. Creates a detailed audit trail with IP address and
+        user agent information.
       summary: Accept terms and conditions
       tags:
       - Authentication
@@ -343,7 +346,9 @@ paths:
         '200':
           description: Terms accepted successfully
         '400':
-          description: Terms acceptance required
+          description: Validation errors
+        '401':
+          description: Authentication required
   /api/v1/auth/forgot-password/:
     post:
       operationId: forgot_password
@@ -519,7 +524,7 @@ paths:
       - {}
       responses:
         '200':
-          description: Terms status information
+          description: Terms status information with current version details
   /api/v1/auth/token/refresh/:
     post:
       operationId: auth_token_refresh_create
@@ -1753,6 +1758,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/Notification'
           description: ''
+  /api/v1/users/onboard/:
+    post:
+      operationId: complete_onboarding
+      description: Complete user onboarding process after successful email verification.
+        Updates user profile with role, location, affiliation, contribution methods,
+        and skill level.
+      summary: Complete user onboarding
+      tags:
+      - User Onboarding
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OnboardCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OnboardCompleteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Onboarding completed successfully
+        '400':
+          description: Validation errors or email not verified
+        '401':
+          description: Authentication required
   /api/v1/users/onboarding/:
     get:
       operationId: users_onboarding_retrieve
@@ -2167,6 +2202,187 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserStats'
           description: ''
+  /api/v1/users/terms/:
+    get:
+      operationId: list_terms_and_conditions
+      description: Retrieve all available terms and conditions versions, ordered by
+        effective date.
+      summary: List all terms and conditions versions
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Terms and Conditions
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: List of terms and conditions versions
+  /api/v1/users/terms-acceptances/:
+    get:
+      operationId: list_user_terms_acceptances
+      description: Retrieve the authenticated user's complete terms and conditions
+        acceptance history.
+      summary: List user's terms acceptance history
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - User Terms Acceptance
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: User's terms acceptance history
+        '401':
+          description: Authentication required
+  /api/v1/users/terms-acceptances/{id}/:
+    get:
+      operationId: retrieve_user_terms_acceptance
+      description: Get details of a specific terms acceptance record by ID.
+      summary: Retrieve specific terms acceptance record
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - User Terms Acceptance
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTermsAcceptance'
+          description: ''
+        '404':
+          description: Acceptance record not found
+        '401':
+          description: Authentication required
+  /api/v1/users/terms/{id}/:
+    get:
+      operationId: retrieve_terms_and_conditions
+      description: Get details of a specific terms and conditions version by ID.
+      summary: Retrieve specific terms and conditions version
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this terms and conditions.
+        required: true
+      tags:
+      - Terms and Conditions
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+        '404':
+          description: Terms version not found
+  /api/v1/users/terms/accept/:
+    post:
+      operationId: accept_terms_simple
+      description: Simplified endpoint for accepting terms using structured version
+        ID format. Accepts only a boolean and structured version ID.
+      summary: Accept terms and conditions (simplified)
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptTermsSimpleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcceptTermsSimpleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcceptTermsSimpleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Terms accepted successfully
+        '400':
+          description: Validation errors
+        '401':
+          description: Authentication required
+  /api/v1/users/terms/current/:
+    get:
+      operationId: get_current_terms
+      description: Retrieve the currently active terms and conditions that users must
+        accept.
+      summary: Get current active terms and conditions
+      tags:
+      - Terms and Conditions
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Current active terms and conditions
+        '404':
+          description: No active terms and conditions found
+  /api/v1/users/terms/current/structured/:
+    get:
+      operationId: get_current_terms_structured
+      description: Retrieve the currently active terms with structured sections and
+        complete metadata for easier frontend consumption.
+      summary: Get current terms with structured content
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Current terms with structured content and metadata
+        '404':
+          description: No active terms and conditions found
 components:
   schemas:
     AIModel:
@@ -2220,8 +2436,45 @@ components:
         accept_terms:
           type: boolean
           description: Must be true to accept terms and conditions
+        terms_version_id:
+          type: string
+          format: uuid
+          description: Specific terms version to accept (optional - defaults to current)
       required:
       - accept_terms
+    AcceptTermsSimpleRequest:
+      type: object
+      description: Simplified serializer for accepting terms and conditions using
+        structured version ID.
+      properties:
+        accepted:
+          type: boolean
+          description: Must be true to accept terms and conditions
+        version_id:
+          type: string
+          minLength: 1
+          description: Structured version ID like 'terms_v1.0.0' (optional - defaults
+            to current)
+      required:
+      - accepted
+    AffiliationEnum:
+      enum:
+      - student
+      - educator_researcher
+      - policy_maker
+      - tech_enthusiast
+      - climate_advocate
+      - nature_enthusiast
+      - media_personnel
+      type: string
+      description: |-
+        * `student` - Student
+        * `educator_researcher` - Educator/Researcher
+        * `policy_maker` - Policy Maker
+        * `tech_enthusiast` - Tech Enthusiast
+        * `climate_advocate` - Climate Advocate
+        * `nature_enthusiast` - Nature Enthusiast
+        * `media_personnel` - Media Personnel
     BiodiversityRecord:
       type: object
       description: Serializer for BiodiversityRecord model with support for geospatial
@@ -2410,6 +2663,20 @@ components:
           nullable: true
       required:
       - biodiversity_record
+    ContributionMethodEnum:
+      enum:
+      - species_observation
+      - habitat_restoration
+      - climate_advocacy
+      - eco_photography
+      - community_support
+      type: string
+      description: |-
+        * `species_observation` - species_observation
+        * `habitat_restoration` - habitat_restoration
+        * `climate_advocacy` - climate_advocacy
+        * `eco_photography` - eco_photography
+        * `community_support` - community_support
     CustomTokenObtainPair:
       type: object
       description: Custom JWT token serializer with additional user info and email-based
@@ -2868,6 +3135,43 @@ components:
         * `google` - Google
         * `github` - GitHub
         * `facebook` - Facebook
+    OnboardCompleteRequest:
+      type: object
+      description: Serializer for completing user onboarding with all required fields.
+      properties:
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        city:
+          type: string
+          nullable: true
+          maxLength: 100
+        affiliation:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/AffiliationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        contribution_method:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionMethodEnum'
+          description: List of contribution methods the user is interested in
+        skill_level:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SkillLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - contribution_method
     Onboarding:
       type: object
       description: Serializer for user onboarding.
@@ -3385,6 +3689,28 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        city:
+          type: string
+          nullable: true
+          maxLength: 100
+        affiliation:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/AffiliationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        contribution_method:
+          nullable: true
+        skill_level:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SkillLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         oauth_provider:
           nullable: true
           oneOf:
@@ -3393,6 +3719,8 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         notification_preferences:
           nullable: true
+        email_verified:
+          type: boolean
     Project:
       type: object
       description: Serializer for projects.
@@ -3539,14 +3867,9 @@ components:
           type: string
           writeOnly: true
           minLength: 1
-        password2:
-          type: string
-          writeOnly: true
-          minLength: 1
       required:
       - email
       - password
-      - password2
     ResendVerificationRequest:
       type: object
       description: |-
@@ -3659,6 +3982,16 @@ components:
         * `contributor` - Contributor
         * `researcher` - Researcher
         * `expert` - Expert
+    SkillLevelEnum:
+      enum:
+      - beginner
+      - enthusiast
+      - expert
+      type: string
+      description: |-
+        * `beginner` - Beginner
+        * `enthusiast` - Enthusiast
+        * `expert` - Expert
     StatusEnum:
       enum:
       - active
@@ -3702,6 +4035,43 @@ components:
       - order
       - phylum
       - species
+    TermsAndConditions:
+      type: object
+      description: Serializer for terms and conditions content.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: string
+          maxLength: 20
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        effective_date:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - effective_date
+      - id
+      - title
+      - updated_at
+      - version
     TokenRefresh:
       type: object
       properties:
@@ -3770,6 +4140,28 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        city:
+          type: string
+          nullable: true
+          maxLength: 100
+        affiliation:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/AffiliationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        contribution_method:
+          nullable: true
+        skill_level:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SkillLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         oauth_provider:
           nullable: true
           oneOf:
@@ -3795,6 +4187,8 @@ components:
           type: string
           format: date-time
           readOnly: true
+        email_verified:
+          type: boolean
       required:
       - badges
       - date_joined
@@ -3890,6 +4284,28 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        country:
+          type: string
+          nullable: true
+          maxLength: 100
+        city:
+          type: string
+          nullable: true
+          maxLength: 100
+        affiliation:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/AffiliationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        contribution_method:
+          nullable: true
+        skill_level:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SkillLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         oauth_provider:
           nullable: true
           oneOf:
@@ -3898,6 +4314,8 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         notification_preferences:
           nullable: true
+        email_verified:
+          type: boolean
       required:
       - email
       - username
@@ -3928,6 +4346,47 @@ components:
       - total_observations
       - total_points
       - verified_observations
+    UserTermsAcceptance:
+      type: object
+      description: Serializer for user terms acceptance records.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+        username:
+          type: string
+          readOnly: true
+        terms_version:
+          type: string
+          format: uuid
+        terms_version_title:
+          type: string
+          readOnly: true
+        terms_version_number:
+          type: string
+          readOnly: true
+        accepted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+      required:
+      - accepted_at
+      - id
+      - ip_address
+      - terms_version
+      - terms_version_number
+      - terms_version_title
+      - user
+      - user_agent
+      - username
     Web3Auth:
       type: object
       description: Serializer for Web3 wallet authentication.

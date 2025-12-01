@@ -1059,7 +1059,7 @@ class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
     
     @extend_schema(
         operation_id="get_current_terms_structured",
-        tags=["Terms and Conditions"],
+        tags=["Authentication"],
         summary="Get current terms with structured content",
         description="Retrieve the currently active terms with structured sections and complete metadata for easier frontend consumption.",
         responses={
@@ -1121,7 +1121,7 @@ class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
     
     @extend_schema(
         operation_id="accept_terms_simple",
-        tags=["Terms and Conditions"],
+        tags=["Authentication"],
         summary="Accept terms and conditions (simplified)",
         description="Simplified endpoint for accepting terms using structured version ID format. Accepts only a boolean and structured version ID.",
         request=AcceptTermsSimpleSerializer,
