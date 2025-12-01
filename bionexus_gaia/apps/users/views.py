@@ -962,12 +962,22 @@ class CheckTermsStatusView(generics.GenericAPIView):
         })
 
 
-class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
+class TermsAndConditionsViewSet(viewsets.ModelViewSet):
     """
     API endpoint for terms and conditions content.
     """
     serializer_class = TermsAndConditionsSerializer
     permission_classes = [AllowAny]
+    
+    def get_permissions(self):
+        """
+        Allow anyone to read terms, but only staff to create/update/delete.
+        """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsAdminUser]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
     
     @extend_schema(
         operation_id="list_terms_and_conditions",
@@ -1012,6 +1022,22 @@ class TermsAndConditionsViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+    
+    @extend_schema(
+        operation_id="create_terms_and_conditions",
+        tags=["Terms and Conditions"],
+        summary="Create new terms and conditions version",
+        description="Create a new terms and conditions version. Only admin users can perform this action.",
+        request=TermsAndConditionsSerializer,
+        responses={
+            201: TermsAndConditionsSerializer,
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Admin access required")
+        }
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
     
     def get_queryset(self):
         return TermsAndConditions.objects.all()

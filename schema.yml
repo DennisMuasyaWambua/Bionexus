@@ -2235,6 +2235,40 @@ paths:
       responses:
         '200':
           description: List of terms and conditions versions
+    post:
+      operationId: create_terms_and_conditions
+      description: Create a new terms and conditions version. Only admin users can
+        perform this action.
+      summary: Create new terms and conditions version
+      tags:
+      - Terms and Conditions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '403':
+          description: Admin access required
   /api/v1/users/terms-acceptances/:
     get:
       operationId: list_user_terms_acceptances
@@ -2322,6 +2356,91 @@ paths:
           description: ''
         '404':
           description: Terms version not found
+    put:
+      operationId: users_terms_update
+      description: API endpoint for terms and conditions content.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this terms and conditions.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TermsAndConditionsRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+    patch:
+      operationId: users_terms_partial_update
+      description: API endpoint for terms and conditions content.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this terms and conditions.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTermsAndConditionsRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TermsAndConditions'
+          description: ''
+    delete:
+      operationId: users_terms_destroy
+      description: API endpoint for terms and conditions content.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this terms and conditions.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/users/terms/accept/:
     post:
       operationId: accept_terms_simple
@@ -2344,6 +2463,7 @@ paths:
         required: true
       security:
       - jwtAuth: []
+      - {}
       responses:
         '200':
           description: Terms accepted successfully
@@ -3640,6 +3760,28 @@ components:
           type: string
         rewards_description:
           type: string
+    PatchedTermsAndConditionsRequest:
+      type: object
+      description: Serializer for terms and conditions content.
+      properties:
+        version:
+          type: string
+          minLength: 1
+          maxLength: 20
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+        sections:
+          description: Structured sections for terms content
+        effective_date:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
     PatchedUserRequest:
       type: object
       description: Serializer for the User model.
@@ -4051,6 +4193,8 @@ components:
           maxLength: 200
         content:
           type: string
+        sections:
+          description: Structured sections for terms content
         effective_date:
           type: string
           format: date-time
@@ -4071,6 +4215,33 @@ components:
       - id
       - title
       - updated_at
+      - version
+    TermsAndConditionsRequest:
+      type: object
+      description: Serializer for terms and conditions content.
+      properties:
+        version:
+          type: string
+          minLength: 1
+          maxLength: 20
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+        sections:
+          description: Structured sections for terms content
+        effective_date:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+      required:
+      - content
+      - effective_date
+      - title
       - version
     TokenRefresh:
       type: object

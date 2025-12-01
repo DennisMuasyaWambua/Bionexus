@@ -615,13 +615,56 @@ class TermsAndConditionsSerializer(serializers.ModelSerializer):
     """
     Serializer for terms and conditions content.
     """
+    sections = serializers.JSONField(required=False, help_text="Structured sections for terms content")
+    
     class Meta:
         model = TermsAndConditions
         fields = [
-            'id', 'version', 'title', 'content', 'effective_date', 
+            'id', 'version', 'title', 'content', 'sections', 'effective_date', 
             'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def validate_version(self, value):
+        """
+        Ensure version is unique.
+        """
+        if self.instance is None:  # Creating new instance
+            if TermsAndConditions.objects.filter(version=value).exists():
+                raise serializers.ValidationError("A terms version with this version number already exists.")
+        return value
+    
+    def validate(self, attrs):
+        """
+        Validate business logic for terms creation.
+        """
+        # Ensure at least one of content or sections is provided
+        content = attrs.get('content', '')
+        sections = attrs.get('sections', [])
+        
+        if not content and not sections:
+            raise serializers.ValidationError({
+                'content': 'Either content or sections must be provided.',
+                'sections': 'Either content or sections must be provided.'
+            })
+        
+        # If is_active is True, deactivate other active terms
+        if attrs.get('is_active', False) and self.instance is None:
+            attrs['_deactivate_others'] = True
+            
+        return attrs
+    
+    def create(self, validated_data):
+        """
+        Create new terms and handle active status.
+        """
+        deactivate_others = validated_data.pop('_deactivate_others', False)
+        
+        if deactivate_others:
+            # Deactivate all other active terms
+            TermsAndConditions.objects.filter(is_active=True).update(is_active=False)
+        
+        return super().create(validated_data)
 
 
 class UserTermsAcceptanceSerializer(serializers.ModelSerializer):
