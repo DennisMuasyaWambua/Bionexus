@@ -64,9 +64,6 @@ INSTALLED_APPS = [
     'bionexus_gaia.apps.submissions',
 ]
 
-CORS_ALLOWED_ORIGINS=[
-    "https://bionexus-ohn92.ondigitalocean.app/",
-]
 
 # Add GeoDjango and other apps only if not using SQLite
 # USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
@@ -235,6 +232,7 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://bionexus-ohn92.ondigitalocean.app"
 ]
 
 # API Documentation settings
