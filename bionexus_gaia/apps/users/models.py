@@ -56,6 +56,8 @@ class User(AbstractUser):
     profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
     
     # User role and onboarding
+
+    
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True, default='contributor')
     onboarding_completed = models.BooleanField(default=False)
     onboarding_step = models.IntegerField(default=0)

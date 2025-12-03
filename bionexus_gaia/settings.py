@@ -64,6 +64,10 @@ INSTALLED_APPS = [
     'bionexus_gaia.apps.submissions',
 ]
 
+CORS_ALLOWED_ORIGINS=[
+    "https://bionexus-ohn92.ondigitalocean.app/",
+]
+
 # Add GeoDjango and other apps only if not using SQLite
 # USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
 # if not USE_SQLITE:
