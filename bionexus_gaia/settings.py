@@ -235,6 +235,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://bionexus-ohn92.ondigitalocean.app"
 ]
 
+# CSRF trusted origins for admin panel
+CSRF_TRUSTED_ORIGINS = [
+    "https://bionexus-ohn92.ondigitalocean.app"
+]
+
 # API Documentation settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'BioNexus Gaia API',
