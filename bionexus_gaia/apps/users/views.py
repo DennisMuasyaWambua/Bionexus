@@ -205,6 +205,9 @@ class UserActivityViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Filter activities to only show the current user's activities.
         """
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return UserActivity.objects.none()
         return UserActivity.objects.filter(user=self.request.user)
 
 
@@ -478,6 +481,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
         """
         Filter notifications to only show the current user's notifications.
         """
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return Notification.objects.none()
         return Notification.objects.filter(user=self.request.user)
     
     @action(detail=True, methods=['post'])
@@ -597,6 +603,9 @@ class RewardViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Filter rewards to only show the current user's rewards.
         """
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return Reward.objects.none()
         return Reward.objects.filter(user=self.request.user, is_active=True)
 
 
@@ -1307,4 +1316,7 @@ class UserTermsAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
         return super().retrieve(request, *args, **kwargs)
     
     def get_queryset(self):
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return UserTermsAcceptance.objects.none()
         return UserTermsAcceptance.objects.filter(user=self.request.user)

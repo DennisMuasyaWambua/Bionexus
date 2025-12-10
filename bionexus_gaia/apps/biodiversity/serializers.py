@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import BiodiversityRecord
 
 class BiodiversityRecordSerializer(serializers.ModelSerializer):
@@ -14,6 +16,9 @@ class BiodiversityRecordSerializer(serializers.ModelSerializer):
     blockchain_hash = serializers.CharField(read_only=True)
     is_verified = serializers.BooleanField(read_only=True)
     contributor_username = serializers.CharField(source='contributor.username', read_only=True)
+    
+    # Properly annotate the location field for schema generation
+    location = serializers.CharField(read_only=True, help_text="PostGIS Point field in WKT format")
     
     class Meta:
         model = BiodiversityRecord
@@ -101,12 +106,14 @@ class BiodiversityRecordExportSerializer(serializers.ModelSerializer):
             'notes', 'ai_confidence', 'is_verified', 'created_at'
         ]
     
-    def get_latitude(self, obj):
+    @extend_schema_field(OpenApiTypes.FLOAT)
+    def get_latitude(self, obj) -> float:
         if obj.location:
             return obj.location.y
         return None
     
-    def get_longitude(self, obj):
+    @extend_schema_field(OpenApiTypes.FLOAT)
+    def get_longitude(self, obj) -> float:
         if obj.location:
             return obj.location.x
         return None

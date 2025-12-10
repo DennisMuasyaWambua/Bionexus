@@ -3,6 +3,7 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from django.contrib.auth import get_user_model
 
 from ..users.models import UserActivity, Project, Notification, Reward
@@ -13,6 +14,38 @@ from ..users.models import UserActivity, Project, Notification, Reward
 User = get_user_model()
 
 
+@extend_schema(
+    tags=['Dashboard'],
+    summary='Get dashboard overview',
+    description='Get dashboard overview data including user stats, activities, and global statistics.',
+    responses={
+        200: OpenApiResponse(
+            description='Dashboard overview data',
+            examples=[
+                OpenApiExample(
+                    name='Dashboard Response',
+                    value={
+                        "user_stats": {
+                            "total_points": 150,
+                            "observations_count": 5,
+                            "level": 2,
+                            "badges_count": 3
+                        },
+                        "recent_activities": [],
+                        "user_projects": [],
+                        "unread_notifications": 2,
+                        "global_stats": {
+                            "total_users": 100,
+                            "active_projects": 5,
+                            "total_observations": 500,
+                            "total_species_identified": 250
+                        }
+                    }
+                )
+            ]
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_overview(request):

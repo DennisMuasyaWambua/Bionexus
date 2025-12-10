@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Polygon
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import Mission, MissionParticipation, CitizenObservation
 from bionexus_gaia.apps.biodiversity.serializers import BiodiversityRecordSerializer
 from bionexus_gaia.apps.biodiversity.models import BiodiversityRecord
@@ -18,6 +20,9 @@ class MissionSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    
+    # Properly annotate the area field for schema generation
+    area = serializers.CharField(read_only=True, help_text="PostGIS Polygon field in WKT format")
     
     class Meta:
         model = Mission
@@ -103,12 +108,14 @@ class CitizenObservationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'username', 'points_awarded', 'created_at']
     
-    def get_mission_title(self, obj):
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_mission_title(self, obj) -> str:
         if obj.mission:
             return obj.mission.title
         return None
     
-    def get_biodiversity_record_data(self, obj):
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_biodiversity_record_data(self, obj) -> dict:
         return {
             'id': obj.biodiversity_record.id,
             'species_name': obj.biodiversity_record.species_name,

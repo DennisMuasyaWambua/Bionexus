@@ -3,6 +3,8 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from django.contrib.auth import get_user_model
 
 from ..users.models import Project, Notification
@@ -14,6 +16,37 @@ from ..users.serializers import UserSerializer, ProjectSerializer, NotificationS
 User = get_user_model()
 
 
+@extend_schema(
+    tags=['Search'],
+    summary='Global search',
+    description='Search across users, projects, notifications, observations, and missions.',
+    parameters=[
+        OpenApiParameter(
+            name='q',
+            type=OpenApiTypes.STR,
+            description='Search query string',
+            required=True
+        )
+    ],
+    responses={
+        200: OpenApiResponse(
+            description='Search results across all models',
+            examples=[
+                OpenApiExample(
+                    name='Search Results',
+                    value={
+                        "users": [],
+                        "projects": [],
+                        "notifications": [],
+                        "observations": [],
+                        "missions": [],
+                        "total_count": 0
+                    }
+                )
+            ]
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def global_search(request):
@@ -90,6 +123,30 @@ def global_search(request):
     return Response(results)
 
 
+@extend_schema(
+    tags=['Search'],
+    summary='Get search suggestions',
+    description='Get search suggestions based on user activity and popular content.',
+    responses={
+        200: OpenApiResponse(
+            description='Search suggestions',
+            examples=[
+                OpenApiExample(
+                    name='Suggestions Response',
+                    value={
+                        "popular_searches": [
+                            "endangered species",
+                            "local wildlife",
+                            "bird observations"
+                        ],
+                        "recent_searches": [],
+                        "trending_species": []
+                    }
+                )
+            ]
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search_suggestions(request):

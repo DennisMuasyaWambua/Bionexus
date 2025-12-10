@@ -117,6 +117,9 @@ class LeaderboardView(generics.ListAPIView):
         """
         Calculate leaderboard data.
         """
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return []
         # Calculate total points per user
         users_data = CitizenObservation.objects.values('user').annotate(
             total_points=Sum('points_awarded'),
@@ -173,6 +176,10 @@ class BiodiversityMapView(generics.ListAPIView):
         """
         Get biodiversity records for map display.
         """
+        # Check for swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return []
+            
         # Query public biodiversity records with location data
         records = BiodiversityRecord.objects.filter(
             is_public=True,

@@ -3,6 +3,8 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 from .models import UserActivity, Notification, Project, ProjectParticipation, Reward, EmailVerification, PasswordResetToken, TermsAndConditions, UserTermsAcceptance
 from django.core.mail import send_mail
 from django.conf import settings
@@ -263,10 +265,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'creator', 'creator_username', 'participant_count', 'user_joined', 'created_at', 'updated_at']
     
-    def get_participant_count(self, obj):
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_participant_count(self, obj) -> int:
         return obj.participants.filter(projectparticipation__is_active=True).count()
     
-    def get_user_joined(self, obj):
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_user_joined(self, obj) -> bool:
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.participants.filter(

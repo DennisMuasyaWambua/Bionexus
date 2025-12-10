@@ -9,6 +9,7 @@ from rest_framework import viewsets, status, filters, generics
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import BiodiversityRecord
@@ -155,6 +156,31 @@ class BiodiversityRecordViewSet(viewsets.ModelViewSet):
         })
 
 
+@extend_schema(
+    tags=['Biodiversity'],
+    summary='Get species list',
+    description='Get a list of unique species from biodiversity records with observation counts.',
+    responses={
+        200: OpenApiResponse(
+            description='List of unique species',
+            examples=[
+                OpenApiExample(
+                    name='Species List Response',
+                    value={
+                        "count": 2,
+                        "results": [
+                            {
+                                "scientific_name": "Falco peregrinus",
+                                "common_name": "Peregrine Falcon", 
+                                "observation_count": 5
+                            }
+                        ]
+                    }
+                )
+            ]
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def species_list(request):
