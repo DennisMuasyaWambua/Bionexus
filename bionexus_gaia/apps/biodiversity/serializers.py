@@ -26,7 +26,21 @@ class BiodiversityRecordSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'contributor', 'blockchain_hash', 'is_verified', 'created_at', 'updated_at']
         extra_kwargs = {
             'location': {'read_only': True},
+            'image': {'required': False},
+            'observation_date': {'required': True},
         }
+    
+    def validate(self, attrs):
+        """
+        Ensure at least one media file is provided and required fields are present.
+        """
+        # Ensure at least one media file is provided
+        if not any([attrs.get('image'), attrs.get('audio'), attrs.get('video')]):
+            raise serializers.ValidationError({
+                'non_field_errors': ['At least one media file (image, audio, or video) must be provided.']
+            })
+        
+        return attrs
     
     def create(self, validated_data):
         """

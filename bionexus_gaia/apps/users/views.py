@@ -615,7 +615,7 @@ class EmailVerificationView(generics.GenericAPIView):
         request=EmailVerificationSerializer,
         responses={
             200: OpenApiResponse(
-                description="Email verified successfully",
+                description="Email verified successfully with authentication tokens",
                 examples=[
                     OpenApiExample(
                         name="Success Response",
@@ -626,7 +626,9 @@ class EmailVerificationView(generics.GenericAPIView):
                                 "username": "testuser",
                                 "email": "test@example.com",
                                 "email_verified": True
-                            }
+                            },
+                            "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                         }
                     )
                 ]
@@ -660,9 +662,16 @@ class EmailVerificationView(generics.GenericAPIView):
             points_earned=5
         )
         
+        # Generate JWT tokens for the verified user
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        
         return Response({
             'message': 'Email verified successfully',
-            'user': UserSerializer(user).data
+            'user': UserSerializer(user).data,
+            'access': access_token,
+            'refresh': refresh_token
         })
 
 

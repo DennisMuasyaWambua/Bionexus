@@ -16,7 +16,7 @@ class BiodiversityRecord(models.Model):
     common_name = models.CharField(max_length=255, blank=True)
     
     # Media files
-    image = models.ImageField(upload_to='biodiversity/images/')
+    image = models.ImageField(upload_to='biodiversity/images/', blank=True, null=True)
     audio = models.FileField(upload_to='biodiversity/audio/', blank=True, null=True)
     video = models.FileField(upload_to='biodiversity/videos/', blank=True, null=True)
     

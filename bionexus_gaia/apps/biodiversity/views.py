@@ -5,8 +5,8 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib.gis.measure import Distance
 from django.contrib.gis.geos import Point
-from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
+from rest_framework import viewsets, status, filters, generics
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
@@ -105,7 +105,15 @@ class BiodiversityRecordViewSet(viewsets.ModelViewSet):
             response['Content-Disposition'] = 'attachment; filename="biodiversity_export.csv"'
             
             # Create CSV writer and write header
-            writer = csv.DictWriter(response, fieldnames=serializer.child.fields.keys())
+            if queryset.exists():
+                # Get field names from the first serialized item
+                first_item = BiodiversityRecordExportSerializer(queryset[0]).data
+                fieldnames = first_item.keys()
+            else:
+                # Use default fieldnames if no data
+                fieldnames = BiodiversityRecordExportSerializer.Meta.fields
+            
+            writer = csv.DictWriter(response, fieldnames=fieldnames)
             writer.writeheader()
             
             # Write data rows, handling datetime serialization
@@ -129,7 +137,8 @@ class BiodiversityRecordViewSet(viewsets.ModelViewSet):
         # In a real implementation, this would interact with a blockchain smart contract
         if not record.is_verified:
             # Mock blockchain hash (in production this would be the actual transaction hash)
-            mock_hash = "0x" + "".join([f"{i}" for i in range(64)])
+            import secrets
+            mock_hash = "0x" + secrets.token_hex(32)  # 32 bytes = 64 hex chars
             record.blockchain_hash = mock_hash
             record.is_verified = True
             record.save()
@@ -144,3 +153,44 @@ class BiodiversityRecordViewSet(viewsets.ModelViewSet):
             "message": "Record already verified",
             "blockchain_hash": record.blockchain_hash
         })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def species_list(request):
+    """
+    Get a list of unique species from biodiversity records.
+    """
+    # Get distinct species names from biodiversity records
+    species_data = BiodiversityRecord.objects.filter(
+        species_name__isnull=False,
+        species_name__gt=''
+    ).values('species_name', 'common_name').distinct()
+    
+    # Convert to a more structured format
+    species_list = []
+    seen_species = set()
+    
+    for record in species_data:
+        species_name = record['species_name']
+        common_name = record['common_name'] or ''
+        
+        # Avoid duplicates (case-insensitive)
+        species_key = species_name.lower()
+        if species_key not in seen_species:
+            seen_species.add(species_key)
+            species_list.append({
+                'scientific_name': species_name,
+                'common_name': common_name,
+                'observation_count': BiodiversityRecord.objects.filter(
+                    species_name__iexact=species_name
+                ).count()
+            })
+    
+    # Sort by scientific name
+    species_list.sort(key=lambda x: x['scientific_name'])
+    
+    return Response({
+        'count': len(species_list),
+        'results': species_list
+    })

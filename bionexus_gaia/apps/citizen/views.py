@@ -36,10 +36,12 @@ class MissionViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Override permissions for admin-only actions.
+        Override permissions - allow authenticated users to create missions.
         """
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        if self.action in ['update', 'partial_update', 'destroy']:
             self.permission_classes = [IsAdminUser]
+        elif self.action == 'create':
+            self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
     
     def get_queryset(self):
