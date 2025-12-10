@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 
 from .models import Mission, MissionParticipation, CitizenObservation
 from .serializers import (
@@ -112,6 +113,7 @@ class LeaderboardView(generics.ListAPIView):
     """
     serializer_class = LeaderboardEntrySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = CitizenObservation.objects.none()  # Fix for schema generation
     
     def get_queryset(self):
         """
@@ -171,6 +173,7 @@ class BiodiversityMapView(generics.ListAPIView):
     """
     serializer_class = MapDataSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = BiodiversityRecord.objects.none()  # Fix for schema generation
     
     def get_queryset(self):
         """
